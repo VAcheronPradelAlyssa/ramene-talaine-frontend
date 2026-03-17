@@ -1,0 +1,69 @@
+<div class="home-container">
+  <!-- SECTION HÉROS -->
+  <section class="hero">
+    <!-- Décoration pelotes -->
+    <div class="yarn-decoration yarn-1">🧶</div>
+    <div class="yarn-decoration yarn-2">🧶</div>
+    <div class="yarn-decoration yarn-3">🧶</div>
+    
+    <!-- Décoration aiguilles -->
+    <div class="needle-decoration needle-1">🪡</div>
+    <div class="needle-decoration needle-2">🪡</div>
+    
+    <!-- Contenu principal -->
+    <div class="hero-content">
+      <h1 class="hero-title">Ramène ta laine</h1>
+      <p class="hero-subtitle">Donnez une seconde vie à vos pelotes</p>
+      
+      <!-- Barre de recherche -->
+      <div class="search-box">
+        <input type="text" 
+               placeholder="Rechercher des pelotes" 
+               class="search-input"
+               [(ngModel)]="searchQuery"
+               (keyup.enter)="search()">
+        <button class="search-btn" (click)="search()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION CATÉGORIES -->
+  <section class="categories">
+    <div class="category-card card-1" (click)="goToCategory('pelotes')">
+      <div class="card-icon">🧶</div>
+      <h3>🧶 Pelotes de Laine</h3>
+      <p>Trouvez la pelote parfaite</p>
+    </div>
+    
+    <div class="category-card card-2" (click)="goToCategory('aiguilles')">
+      <div class="card-icon">🪡</div>
+      <h3>🪡 Aiguilles & Crochets</h3>
+      <p>Tout pour tricoter et crocheter</p>
+    </div>
+    
+    <div class="category-card card-3" (click)="goToCategory('crochets')">
+      <div class="card-icon">🪝</div>
+      <h3>📚 Livres & Patrons</h3>
+      <p>Inspiration et tutoriels</p>
+    </div>
+    
+    <div class="category-card card-4" (click)="goToCategory('patterns')">
+      <div class="card-icon">🧵</div>
+      <h3>🎁 Accessoires</h3>
+      <p>Outils et rangements</p>
+    </div>
+  </section>
+
+  <!-- SECTION CTA - INSCRIPTION -->
+  <section class="cta" *ngIf="!isLoggedIn">
+    <div class="cta-content">
+      <h2>Prêt à rejoindre notre communauté ?</h2>
+      <p>Échangez vos pelotes avec d'autres passionnés de tricot et crochet</p>
+      <button class="cta-button" (click)="goToRegister()">
+        S'inscrire gratuitement
+      </button>
+    </div>
+  </section>
+</div>
