@@ -1,12 +1,31 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { JsonPipe } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [JsonPipe, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-  protected readonly title = signal('ramene-talaine-frontend');
+export class App implements OnInit {
+  private http = inject(HttpClient);
+
+  status = signal('chargement');
+  response = signal<unknown>(null);
+  error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.http.get('http://localhost:8080/api/health').subscribe({
+      next: (data) => {
+        this.status.set('connecte');
+        this.response.set(data);
+      },
+      error: (err) => {
+        this.status.set('erreur');
+        this.error.set(err?.message ?? 'Erreur inconnue');
+      }
+    });
+  }
 }
