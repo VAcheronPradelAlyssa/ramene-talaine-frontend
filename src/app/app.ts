@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { JsonPipe } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { Navbar } from './components/shared/navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  imports: [JsonPipe, RouterOutlet],
+  imports: [JsonPipe, RouterOutlet, Navbar],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
