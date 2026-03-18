@@ -1,0 +1,189 @@
+<mat-toolbar color="primary" class="header">
+    <div class="header-content">
+        <div class="header-left">
+            <button class="menu-toggle" type="button" (click)="toggleMobileMenu()" *ngIf="isMobile">
+                <mat-icon>menu</mat-icon>
+            </button>
+            <div class="logo" role="img" aria-label="Ramene ta Laine">
+                <img src="assets/logo/Ramene-ta-laine.png" alt="Ramene ta Laine" class="logo-image">
+            </div>
+        </div>
+
+        <nav class="nav-center" [class.mobile-open]="mobileMenuOpen" *ngIf="!isMobile || mobileMenuOpen">
+            <button mat-button type="button">Accueil</button>
+            <button mat-button type="button">Annonces</button>
+
+            <div class="dropdown-trigger" [matMenuTriggerFor]="categoriesMenu">
+                <button mat-button type="button">
+                    Categories
+                    <mat-icon>expand_more</mat-icon>
+                </button>
+            </div>
+
+            <mat-menu #categoriesMenu="matMenu" class="categories-menu">
+                <button mat-menu-item type="button">
+                    <mat-icon>category</mat-icon>
+                    <span>Pelotes de laine</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>content_cut</mat-icon>
+                    <span>Aiguilles a tricoter</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>construction</mat-icon>
+                    <span>Crochets</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>description</mat-icon>
+                    <span>Patrons</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>linear_scale</mat-icon>
+                    <span>Fils et Cordons</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>menu_book</mat-icon>
+                    <span>Livres et Magazines</span>
+                </button>
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item type="button">
+                    <mat-icon>auto_awesome</mat-icon>
+                    <span>Produits neufs</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>verified</mat-icon>
+                    <span>Bon etat</span>
+                </button>
+                <button mat-menu-item type="button">
+                    <mat-icon>sell</mat-icon>
+                    <span>Destockage</span>
+                </button>
+            </mat-menu>
+
+            <button mat-button type="button">Comment ca marche ?</button>
+            <button mat-button type="button">Communaute</button>
+        </nav>
+
+        <div class="header-right">
+            <div class="search-bar" *ngIf="!isMobile">
+                <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    [(ngModel)]="searchQuery"
+                    (keyup.enter)="search()"
+                    class="search-input"
+                >
+                <button type="button" (click)="search()" class="search-btn">
+                    <mat-icon>search</mat-icon>
+                </button>
+            </div>
+
+            <button mat-icon-button type="button" *ngIf="isMobile" (click)="toggleSearchBar()">
+                <mat-icon>search</mat-icon>
+            </button>
+
+            <ng-container *ngIf="currentUser; else loginSection">
+                <button mat-raised-button type="button" class="btn-publish" *ngIf="!isMobile">
+                    <mat-icon>add</mat-icon>
+                    Publier
+                </button>
+
+                <button
+                    mat-icon-button
+                    type="button"
+                    [matBadge]="unreadMessagesCount"
+                    matBadgeColor="warn"
+                    *ngIf="!isMobile"
+                >
+                    <mat-icon>mail</mat-icon>
+                </button>
+
+                <button
+                    mat-icon-button
+                    type="button"
+                    [matMenuTriggerFor]="notificationsMenu"
+                    *ngIf="!isMobile"
+                    [matBadge]="notificationsCount"
+                    matBadgeColor="warn"
+                >
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <mat-menu #notificationsMenu="matMenu">
+                    <button mat-menu-item type="button" disabled *ngIf="notificationsCount === 0">
+                        Aucune notification
+                    </button>
+                    <button mat-menu-item type="button" *ngFor="let notif of notifications" disabled>
+                        {{ notif }}
+                    </button>
+                    <mat-divider *ngIf="notificationsCount > 0"></mat-divider>
+                    <button mat-menu-item type="button" *ngIf="notificationsCount > 0">Voir tout</button>
+                </mat-menu>
+
+                <button mat-icon-button type="button" *ngIf="!isMobile" [matBadge]="favoritesCount">
+                    <mat-icon>favorite_border</mat-icon>
+                </button>
+
+                <button mat-icon-button type="button" [matMenuTriggerFor]="userMenu" class="user-button">
+                    <mat-icon>account_circle</mat-icon>
+                </button>
+                <mat-menu #userMenu="matMenu" class="user-menu">
+                    <button mat-menu-item type="button">
+                        <mat-icon>person</mat-icon>
+                        <span>Mon profil</span>
+                    </button>
+                    <button mat-menu-item type="button">
+                        <mat-icon>view_list</mat-icon>
+                        <span>Mes annonces</span>
+                    </button>
+                    <button mat-menu-item type="button">
+                        <mat-icon>mail</mat-icon>
+                        <span>Mes messages</span>
+                    </button>
+                    <button mat-menu-item type="button">
+                        <mat-icon>favorite</mat-icon>
+                        <span>Mes favoris</span>
+                    </button>
+
+                    <mat-divider></mat-divider>
+
+                    <button mat-menu-item type="button">
+                        <mat-icon>settings</mat-icon>
+                        <span>Parametres</span>
+                    </button>
+                    <button mat-menu-item type="button">
+                        <mat-icon>help</mat-icon>
+                        <span>Aide</span>
+                    </button>
+
+                    <mat-divider></mat-divider>
+
+                    <button mat-menu-item type="button" (click)="logout()" class="logout-item">
+                        <mat-icon>logout</mat-icon>
+                        <span>Deconnexion</span>
+                    </button>
+                </mat-menu>
+            </ng-container>
+
+            <ng-template #loginSection>
+                <button mat-button type="button" class="login-btn" *ngIf="!isMobile">Connexion</button>
+                <button mat-raised-button type="button" color="accent" class="register-btn">Inscription</button>
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="mobile-search-bar" *ngIf="isMobile && searchBarOpen">
+        <input
+            type="text"
+            placeholder="Rechercher..."
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="search()"
+            class="search-input"
+            autofocus
+        >
+        <button type="button" (click)="search()" class="search-btn">
+            <mat-icon>search</mat-icon>
+        </button>
+    </div>
+</mat-toolbar>
