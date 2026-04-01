@@ -1,0 +1,46 @@
+<div class="inscription-container">
+	<h2>Inscription</h2>
+
+	<div *ngIf="loading" class="loading">Inscription en cours...</div>
+	<div *ngIf="successMsg" class="success">{{ successMsg }}</div>
+	<div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+	<form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate>
+		<div class="form-group">
+			<label for="prenom">Prénom *</label>
+			<input id="prenom" name="prenom" type="text" required [(ngModel)]="formData.prenom" #prenom="ngModel">
+			<div class="error" *ngIf="prenom.invalid && (prenom.dirty || prenom.touched)">Le prénom est obligatoire.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="nom">Nom *</label>
+			<input id="nom" name="nom" type="text" required [(ngModel)]="formData.nom" #nom="ngModel">
+			<div class="error" *ngIf="nom.invalid && (nom.dirty || nom.touched)">Le nom est obligatoire.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="email">Email *</label>
+			<input id="email" name="email" type="email" required [(ngModel)]="formData.email" #email="ngModel">
+			<div class="error" *ngIf="email.invalid && (email.dirty || email.touched)">L'email est obligatoire et doit être valide.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="password">Mot de passe *</label>
+			<input id="password" name="password" type="password" required [(ngModel)]="formData.password" #password="ngModel">
+			<div class="error" *ngIf="password.invalid && (password.dirty || password.touched)">Le mot de passe est obligatoire.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="surnom">Surnom *</label>
+			<input id="surnom" name="surnom" type="text" required [(ngModel)]="formData.surnom" #surnom="ngModel">
+			<div class="error" *ngIf="surnom.invalid && (surnom.dirty || surnom.touched)">Le surnom est obligatoire.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="ville">Ville</label>
+			<input id="ville" name="ville" type="text" [(ngModel)]="formData.ville">
+		</div>
+
+		<button type="submit" [disabled]="form.invalid">S'inscrire</button>
+	</form>
+</div>
