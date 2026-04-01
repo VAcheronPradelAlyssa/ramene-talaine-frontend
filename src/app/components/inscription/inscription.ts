@@ -35,13 +35,13 @@ export class Inscription {
       this.successMsg = '';
       this.errorMsg = '';
       this.auth.signup(this.formData).subscribe({
-        next: () => {
+        next: (user: any) => {
           this.successMsg = 'Inscription réussie !';
           this.loading = false;
-          // Redirection possible après succès :
-          // this.router.navigate(['/']);
+          this.auth.setCurrentUser(user || this.formData); // Simule la connexion
+          this.router.navigate(['/']);
         },
-        error: (err) => {
+        error: (err: any) => {
           this.errorMsg = err?.error?.message || 'Erreur lors de l\'inscription.';
           this.loading = false;
         }

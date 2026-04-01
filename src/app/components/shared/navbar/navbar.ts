@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -8,9 +8,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -25,13 +28,21 @@ import { RouterModule } from '@angular/router';
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
-export class Navbar {
+export class Navbar implements OnInit {
   isMobile = false;
   mobileMenuOpen = false;
   searchBarOpen = false;
   searchQuery = '';
 
-  currentUser: { name: string } | null = null;
+  currentUser: any = null;
+    constructor(private auth: AuthService) {
+    }
+
+    ngOnInit(): void {
+      this.auth.currentUser$.subscribe((user: any) => {
+        this.currentUser = user;
+      });
+    }
   unreadMessagesCount = 0;
   notifications: string[] = [];
   notificationsCount = 0;
