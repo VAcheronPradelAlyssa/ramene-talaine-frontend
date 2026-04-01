@@ -7,6 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +20,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatMenuModule,
     MatDividerModule,
     MatBadgeModule,
+    RouterModule,
   ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
@@ -29,7 +31,7 @@ export class Navbar {
   searchBarOpen = false;
   searchQuery = '';
 
-  currentUser: { name: string } | null = { name: 'Utilisateur' };
+  currentUser: { name: string } | null = null;
   unreadMessagesCount = 0;
   notifications: string[] = [];
   notificationsCount = 0;
