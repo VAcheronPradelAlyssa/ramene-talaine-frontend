@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Listing } from '../models/listing.model';
+import { environment } from '../../environments/environment';
 
 type ListingsApiResponse =
   | Listing[]
@@ -15,7 +16,7 @@ type ListingsApiResponse =
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/listings';
+  private readonly baseUrl = `${environment.API_URL}/api/listings`;
 
   createListing(listing: Partial<Listing>): Observable<Listing> {
     return this.http.post<Listing>(this.baseUrl, listing);

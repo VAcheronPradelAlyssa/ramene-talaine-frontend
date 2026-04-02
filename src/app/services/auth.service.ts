@@ -2,11 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthResponse, User } from '../models/user.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly authBaseUrl = 'http://localhost:8080/api/auth';
+  private readonly authBaseUrl = `${environment.API_URL}/api/auth`;
   private readonly tokenKey = 'auth_token';
   private readonly userKey = 'auth_user';
   private _currentUser = new BehaviorSubject<User | null>(this.getStoredUser());
@@ -78,6 +79,6 @@ export class AuthService {
   }
 
   getProfile(): Observable<User> {
-    return this.http.get<User>('http://localhost:8080/api/users/me');
+    return this.http.get<User>(`${environment.API_URL}/api/users/me`);
   }
 }
