@@ -51,14 +51,19 @@ export class CreateListing {
     this.successMsg = '';
     this.errorMsg = '';
 
-    const payload: Listing = {
+    const payload: Partial<Listing> = {
       ...this.formData,
       imageUrls: this.imageUrlsInput
         .split(',')
         .map((url) => url.trim())
         .filter((url) => !!url),
-      price: this.formData.type === ListingType.SALE ? this.formData.price : null,
     };
+
+    if (this.formData.type === ListingType.SALE && this.formData.price != null) {
+      payload.price = this.formData.price;
+    } else {
+      delete payload.price;
+    }
 
     this.listingService.createListing(payload).subscribe({
       next: () => {

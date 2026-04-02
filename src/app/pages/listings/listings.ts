@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { finalize, timeout } from 'rxjs';
 import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -24,14 +25,19 @@ export class Listings implements OnInit {
     this.loading = true;
     this.errorMsg = '';
 
-    this.listingService.getAllListings().subscribe({
+    this.listingService.getAllListings().pipe(
+      timeout(10000),
+      finalize(() => {
+        this.loading = false;
+      })
+    ).subscribe({
       next: (listings) => {
         this.listings = listings;
-        this.loading = false;
       },
       error: (error) => {
-        this.errorMsg = error?.error?.message || 'Erreur lors du chargement des annonces.';
-        this.loading = false;
+        this.errorMsg = error?.name === 'TimeoutError'
+          ? 'Le serveur met trop de temps a repondre.'
+          : (error?.error?.message || 'Erreur lors du chargement des annonces.');
       },
     });
   }

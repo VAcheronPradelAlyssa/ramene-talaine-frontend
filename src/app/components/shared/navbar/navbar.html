@@ -85,7 +85,7 @@
             </button>
 
             <ng-container *ngIf="currentUser; else loginSection">
-                <button mat-raised-button type="button" class="btn-publish" *ngIf="!isMobile">
+                <button mat-raised-button type="button" class="btn-publish" *ngIf="!isMobile" routerLink="/create-listing">
                     <mat-icon>add</mat-icon>
                     Publier
                 </button>
