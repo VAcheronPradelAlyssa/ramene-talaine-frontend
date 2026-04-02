@@ -1,0 +1,64 @@
+.profile-shell {
+  min-height: calc(100vh - 4rem);
+  display: grid;
+  place-items: start;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #fffaf4 0%, #fff 45%, #f7f1ea 100%);
+}
+
+.profile-container {
+  width: min(100%, 600px);
+  padding: 2rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 60px rgba(85, 59, 33, 0.12);
+  border: 1px solid rgba(124, 87, 52, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+h1 {
+  margin: 0 0 2rem;
+  font-size: 2rem;
+  color: #2f1f14;
+}
+
+.state {
+  padding: 1.25rem;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.state.loading {
+  background: rgba(209, 124, 58, 0.1);
+  color: #8f4a1f;
+}
+
+.state.error {
+  background: rgba(163, 50, 47, 0.1);
+  color: #a3322f;
+}
+
+.profile-content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.profile-field label {
+  font-weight: 700;
+  color: #3a2c22;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.profile-field p {
+  margin: 0;
+  color: #5d5047;
+  font-size: 1.1rem;
+}
