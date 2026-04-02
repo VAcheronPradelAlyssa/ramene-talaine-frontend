@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgForm, NgModel, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { User } from '../../models/user.model';
+import { AuthResponse, User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 
@@ -35,10 +35,10 @@ export class Inscription {
       this.successMsg = '';
       this.errorMsg = '';
       this.auth.signup(this.formData).subscribe({
-        next: (user: any) => {
+        next: (response: AuthResponse) => {
           this.successMsg = 'Inscription réussie !';
           this.loading = false;
-          this.auth.setCurrentUser(user || this.formData); // Simule la connexion
+          this.auth.setCurrentUser(response.user ?? this.formData);
           this.router.navigate(['/']);
         },
         error: (err: any) => {

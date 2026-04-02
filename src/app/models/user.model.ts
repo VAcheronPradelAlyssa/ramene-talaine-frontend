@@ -9,3 +9,8 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}

@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
+import { User } from '../../../models/user.model';
 import { AuthService } from '../../../services/auth.service';
 
 
@@ -34,15 +35,15 @@ export class Navbar implements OnInit {
   searchBarOpen = false;
   searchQuery = '';
 
-  currentUser: any = null;
-    constructor(private auth: AuthService) {
-    }
+  currentUser: User | null = null;
 
-    ngOnInit(): void {
-      this.auth.currentUser$.subscribe((user: any) => {
-        this.currentUser = user;
-      });
-    }
+  constructor(private auth: AuthService) {}
+
+  ngOnInit(): void {
+    this.auth.currentUser$.subscribe((user: User | null) => {
+      this.currentUser = user;
+    });
+  }
   unreadMessagesCount = 0;
   notifications: string[] = [];
   notificationsCount = 0;
