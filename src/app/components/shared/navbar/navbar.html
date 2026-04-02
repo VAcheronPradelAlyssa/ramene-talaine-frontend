@@ -167,7 +167,7 @@
             </ng-container>
 
             <ng-template #loginSection>
-                <button mat-button type="button" class="login-btn" *ngIf="!isMobile">Connexion</button>
+                <a mat-button routerLink="/connexion" class="login-btn" *ngIf="!isMobile">Connexion</a>
                 <a mat-raised-button color="accent" class="register-btn" routerLink="/inscription" style="text-decoration:none;">Inscription</a>
             </ng-template>
         </div>
