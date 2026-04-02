@@ -76,4 +76,18 @@ export class AuthService {
     localStorage.removeItem(this.userKey);
     this._currentUser.next(null);
   }
+
+  getProfile(): Observable<User> {
+    const token = this.getToken();
+
+    if (!token) {
+      throw new Error('No token available');
+    }
+
+    return this.http.get<User>('http://localhost:8080/api/users/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 }
