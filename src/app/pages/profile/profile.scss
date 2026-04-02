@@ -79,6 +79,19 @@
   gap: 0;
 }
 
+.profile-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2rem;
+}
+
+@media (max-width: 480px) {
+  .profile-section {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
 .profile-field {
   padding: 1.5rem 0;
   display: flex;
