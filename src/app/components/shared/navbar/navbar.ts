@@ -68,6 +68,7 @@ export class Navbar implements OnInit {
   }
 
   logout(): void {
+    this.auth.logout();
     this.currentUser = null;
     this.mobileMenuOpen = false;
     this.searchBarOpen = false;
