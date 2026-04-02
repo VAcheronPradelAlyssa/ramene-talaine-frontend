@@ -24,13 +24,17 @@ export class Profile implements OnInit {
     this.loading = true;
     this.errorMsg = '';
 
+    console.log('📡 Calling getProfile()...');
+
     this.auth.getProfile().subscribe({
       next: (user) => {
+        console.log('✅ Profile loaded:', user);
         this.user = user;
         this.auth.setCurrentUser(user);
         this.loading = false;
       },
       error: (error) => {
+        console.error('❌ Error loading profile:', error);
         this.errorMsg = error?.error?.message || 'Erreur lors du chargement du profil.';
         this.loading = false;
       },
