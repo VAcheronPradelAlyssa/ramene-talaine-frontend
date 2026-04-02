@@ -6,6 +6,7 @@ import { AuthResponse, User } from '../models/user.model';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private readonly authBaseUrl = '/api/auth';
   private readonly tokenKey = 'auth_token';
   private _currentUser = new BehaviorSubject<User | null>(null);
   currentUser$ = this._currentUser.asObservable();
@@ -16,19 +17,19 @@ export class AuthService {
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/api/login', { email, password })
+      .post<AuthResponse>(`${this.authBaseUrl}/login`, { email, password })
       .pipe(tap((response) => this.storeToken(response.token)));
   }
 
   register(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/api/register', { email, password })
+      .post<AuthResponse>(`${this.authBaseUrl}/register`, { email, password })
       .pipe(tap((response) => this.storeToken(response.token)));
   }
 
   signup(user: User): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/api/signup', user)
+      .post<AuthResponse>(`${this.authBaseUrl}/signup`, user)
       .pipe(tap((response) => this.storeToken(response.token)));
   }
 
