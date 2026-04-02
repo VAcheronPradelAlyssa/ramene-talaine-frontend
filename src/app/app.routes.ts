@@ -4,6 +4,7 @@ import { Home } from './components/home/home';
 import { Inscription } from './components/inscription/inscription';
 import { Connexion } from './components/connexion/connexion';
 import { Profile } from './pages/profile/profile';
+import { CreateListing } from './pages/create-listing/create-listing';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -11,4 +12,5 @@ export const routes: Routes = [
   { path: 'inscription', component: Inscription },
   { path: 'connexion', component: Connexion },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
+  { path: 'create-listing', component: CreateListing, canActivate: [authGuard] },
 ];
