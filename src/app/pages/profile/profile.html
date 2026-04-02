@@ -1,24 +1,30 @@
 <section class="profile-shell">
   <div class="profile-container">
-    <h1>Mon profil</h1>
-
-    <div *ngIf="loading" class="state loading">
-      Chargement du profil...
+    <div class="profile-header">
+      <h1>Mon Profil</h1>
+      <p class="subtitle">Informations de votre compte</p>
     </div>
 
-    <div *ngIf="errorMsg" class="state error">
+    <div *ngIf="loading" class="state state-loading">
+      <span class="spinner"></span>
+      Chargement...
+    </div>
+
+    <div *ngIf="errorMsg" class="state state-error">
       {{ errorMsg }}
     </div>
 
     <div *ngIf="user && !loading" class="profile-content">
       <div class="profile-field">
         <label>Email</label>
-        <p>{{ user.email }}</p>
+        <div class="field-value">{{ user.email }}</div>
       </div>
+
+      <div class="divider"></div>
 
       <div class="profile-field" *ngIf="user.createdAt">
         <label>Compte créé le</label>
-        <p>{{ user.createdAt | date: 'dd/MM/yyyy' }}</p>
+        <div class="field-value">{{ user.createdAt | date: 'dd MMMM yyyy' }}</div>
       </div>
     </div>
   </div>
