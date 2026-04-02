@@ -1,0 +1,42 @@
+<section class="login-shell">
+  <div class="login-card">
+    <p class="eyebrow">Accès compte</p>
+    <h1>Connexion</h1>
+    <p class="subtitle">Renseignez votre email et votre mot de passe pour continuer.</p>
+
+    <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="login-form" novalidate>
+      <label>
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          email
+          autocomplete="email"
+          placeholder="vous@exemple.com"
+        />
+      </label>
+
+      <label>
+        <span>Mot de passe</span>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          minlength="6"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        />
+      </label>
+
+      <p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
+      <p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
+
+      <button type="submit" [disabled]="loading || loginForm.invalid">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+  </div>
+</section>
