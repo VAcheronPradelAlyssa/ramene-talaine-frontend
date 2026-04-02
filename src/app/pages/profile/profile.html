@@ -1,0 +1,64 @@
+<section class="profile-shell">
+  <div class="profile-container">
+    <div class="profile-header">
+      <h1>Mon Profil</h1>
+      <p class="subtitle">Informations de votre compte</p>
+    </div>
+
+    <div *ngIf="loading" class="state state-loading">
+      <span class="spinner"></span>
+      Chargement...
+    </div>
+
+    <div *ngIf="errorMsg" class="state state-error">
+      {{ errorMsg }}
+    </div>
+
+    <div *ngIf="user && !loading" class="profile-content">
+      <div class="profile-section">
+        <div class="profile-field">
+          <label>Prénom</label>
+          <div class="field-value">{{ user.prenom }}</div>
+        </div>
+
+        <div class="profile-field">
+          <label>Nom</label>
+          <div class="field-value">{{ user.nom }}</div>
+        </div>
+
+        <div class="profile-field">
+          <label>Surnom</label>
+          <div class="field-value">{{ user.surnom }}</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="profile-section">
+        <div class="profile-field">
+          <label>Email</label>
+          <div class="field-value">{{ user.email }}</div>
+        </div>
+
+        <div class="profile-field" *ngIf="user.ville">
+          <label>Ville</label>
+          <div class="field-value">{{ user.ville }}</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="profile-section">
+        <div class="profile-field" *ngIf="user.createdAt">
+          <label>Compte créé le</label>
+          <div class="field-value">{{ user.createdAt | date: 'dd MMMM yyyy' }}</div>
+        </div>
+
+        <div class="profile-field" *ngIf="user.updatedAt">
+          <label>Dernière mise à jour</label>
+          <div class="field-value">{{ user.updatedAt | date: 'dd MMMM yyyy à HH:mm' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

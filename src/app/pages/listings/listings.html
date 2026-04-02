@@ -1,0 +1,23 @@
+<section class="listings-shell">
+  <div class="listings-header">
+    <h1>Annonces</h1>
+    <p>Decouvre les annonces disponibles.</p>
+  </div>
+
+  <p class="state loading" *ngIf="loading">Chargement des annonces...</p>
+  <p class="state error" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+  <div class="listings-grid" *ngIf="!loading && !errorMsg">
+    <article class="listing-card" *ngFor="let listing of listings">
+      <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
+
+      <div class="listing-body">
+        <h2>{{ listing.title }}</h2>
+        <p class="meta">{{ getTypeLabel(listing) }}</p>
+        <p class="city">{{ listing.city }}</p>
+      </div>
+    </article>
+
+    <p class="state empty" *ngIf="listings.length === 0">Aucune annonce disponible.</p>
+  </div>
+</section>

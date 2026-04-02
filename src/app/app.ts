@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { JsonPipe } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Navbar } from './components/shared/navbar/navbar';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
-  imports: [JsonPipe, RouterOutlet, Navbar],
+  imports: [RouterOutlet, Navbar],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -18,7 +18,7 @@ export class App implements OnInit {
   error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.http.get('http://localhost:8080/api/health').subscribe({
+    this.http.get(`${environment.API_URL}/api/health`).subscribe({
       next: (data) => {
         this.status.set('connecte');
         this.response.set(data);

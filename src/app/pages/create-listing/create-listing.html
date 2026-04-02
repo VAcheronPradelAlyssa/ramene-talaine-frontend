@@ -1,0 +1,78 @@
+<section class="listing-shell">
+	<div class="listing-card">
+		<h1>Creer une annonce</h1>
+
+		<form #listingForm="ngForm" (ngSubmit)="onSubmit(listingForm)" class="listing-form" novalidate>
+			<label>
+				<span>Titre</span>
+				<input type="text" name="title" [(ngModel)]="formData.title" required />
+			</label>
+
+			<label>
+				<span>Description</span>
+				<textarea name="description" [(ngModel)]="formData.description" rows="4" required></textarea>
+			</label>
+
+			<div class="grid-2">
+				<label>
+					<span>Marque</span>
+					<input type="text" name="brand" [(ngModel)]="formData.brand" required />
+				</label>
+
+				<label>
+					<span>Composition</span>
+					<input type="text" name="composition" [(ngModel)]="formData.composition" required />
+				</label>
+
+				<label>
+					<span>Couleur</span>
+					<input type="text" name="color" [(ngModel)]="formData.color" required />
+				</label>
+
+				<label>
+					<span>Poids</span>
+					<input type="text" name="weight" [(ngModel)]="formData.weight" required />
+				</label>
+
+				<label>
+					<span>Longueur</span>
+					<input type="text" name="length" [(ngModel)]="formData.length" required />
+				</label>
+
+				<label>
+					<span>Type</span>
+					<select name="type" [(ngModel)]="formData.type" (ngModelChange)="onTypeChange()" required>
+						<option *ngFor="let type of listingTypes" [ngValue]="type">{{ type }}</option>
+					</select>
+				</label>
+
+				<label *ngIf="formData.type === listingType.SALE">
+					<span>Prix</span>
+					<input type="number" name="price" [(ngModel)]="formData.price" min="0" required />
+				</label>
+
+				<label>
+					<span>Ville</span>
+					<input type="text" name="city" [(ngModel)]="formData.city" required />
+				</label>
+
+				<label>
+					<span>Code postal</span>
+					<input type="text" name="postalCode" [(ngModel)]="formData.postalCode" required />
+				</label>
+			</div>
+
+			<label>
+				<span>Images (URLs separees par des virgules)</span>
+				<input type="text" name="imageUrls" [(ngModel)]="imageUrlsInput" placeholder="https://..., https://..." />
+			</label>
+
+			<p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
+			<p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
+
+			<button type="submit" [disabled]="loading || listingForm.invalid">
+				{{ loading ? 'Creation...' : 'Creer l\'annonce' }}
+			</button>
+		</form>
+	</div>
+</section>

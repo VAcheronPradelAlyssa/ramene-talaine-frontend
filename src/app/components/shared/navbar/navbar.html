@@ -11,7 +11,7 @@
 
         <nav class="nav-center" [class.mobile-open]="mobileMenuOpen" *ngIf="!isMobile || mobileMenuOpen">
             <button mat-button type="button">Accueil</button>
-            <button mat-button type="button">Annonces</button>
+            <a mat-button routerLink="/listings">Annonces</a>
 
             <div class="dropdown-trigger" [matMenuTriggerFor]="categoriesMenu">
                 <button mat-button type="button">
@@ -85,7 +85,7 @@
             </button>
 
             <ng-container *ngIf="currentUser; else loginSection">
-                <button mat-raised-button type="button" class="btn-publish" *ngIf="!isMobile">
+                <button mat-raised-button type="button" class="btn-publish" *ngIf="!isMobile" routerLink="/create-listing">
                     <mat-icon>add</mat-icon>
                     Publier
                 </button>
@@ -129,10 +129,10 @@
                     <mat-icon>account_circle</mat-icon>
                 </button>
                 <mat-menu #userMenu="matMenu" class="user-menu">
-                    <button mat-menu-item type="button">
+                    <a mat-menu-item routerLink="/profile" type="button">
                         <mat-icon>person</mat-icon>
                         <span>Mon profil</span>
-                    </button>
+                    </a>
                     <button mat-menu-item type="button">
                         <mat-icon>view_list</mat-icon>
                         <span>Mes annonces</span>
@@ -167,8 +167,8 @@
             </ng-container>
 
             <ng-template #loginSection>
-                <button mat-button type="button" class="login-btn" *ngIf="!isMobile">Connexion</button>
-                <button mat-raised-button type="button" color="accent" class="register-btn">Inscription</button>
+                <a mat-button routerLink="/connexion" class="login-btn" *ngIf="!isMobile">Connexion</a>
+                <a mat-raised-button color="accent" class="register-btn" routerLink="/inscription" style="text-decoration:none;">Inscription</a>
             </ng-template>
         </div>
     </div>
