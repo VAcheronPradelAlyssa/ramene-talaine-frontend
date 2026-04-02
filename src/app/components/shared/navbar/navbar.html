@@ -11,7 +11,7 @@
 
         <nav class="nav-center" [class.mobile-open]="mobileMenuOpen" *ngIf="!isMobile || mobileMenuOpen">
             <button mat-button type="button">Accueil</button>
-            <button mat-button type="button">Annonces</button>
+            <a mat-button routerLink="/listings">Annonces</a>
 
             <div class="dropdown-trigger" [matMenuTriggerFor]="categoriesMenu">
                 <button mat-button type="button">
