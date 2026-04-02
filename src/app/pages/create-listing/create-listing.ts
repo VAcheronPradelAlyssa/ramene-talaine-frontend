@@ -25,7 +25,7 @@ export class CreateListing {
     weight: '',
     length: '',
     type: ListingType.SALE,
-    price: undefined,
+    price: null,
     city: '',
     postalCode: '',
     imageUrls: [],
@@ -38,7 +38,7 @@ export class CreateListing {
 
   onTypeChange(): void {
     if (this.formData.type !== ListingType.SALE) {
-      this.formData.price = undefined;
+      this.formData.price = null;
     }
   }
 
@@ -57,7 +57,7 @@ export class CreateListing {
         .split(',')
         .map((url) => url.trim())
         .filter((url) => !!url),
-      price: this.formData.type === ListingType.SALE ? this.formData.price : undefined,
+      price: this.formData.type === ListingType.SALE ? this.formData.price : null,
     };
 
     this.listingService.createListing(payload).subscribe({
@@ -76,7 +76,7 @@ export class CreateListing {
           weight: '',
           length: '',
           type: ListingType.SALE,
-          price: undefined,
+          price: null,
           city: '',
           postalCode: '',
           imageUrls: [],

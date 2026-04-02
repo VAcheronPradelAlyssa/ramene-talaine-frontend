@@ -14,7 +14,7 @@ export interface Listing {
   weight: string;
   length: string;
   type: ListingType;
-  price?: number;
+  price?: number | null;
   city: string;
   postalCode: string;
   imageUrls: string[];
