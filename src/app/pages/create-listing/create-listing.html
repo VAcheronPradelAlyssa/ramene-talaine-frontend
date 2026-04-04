@@ -16,7 +16,15 @@
 			<div class="grid-2">
 				<label>
 					<span>Marque</span>
-					<input type="text" name="brand" [(ngModel)]="formData.brand" required />
+					<select name="brand" [(ngModel)]="formData.brand" required>
+						<option *ngFor="let brand of brands" [value]="brand">{{ brand }}</option>
+						<option value="Autre">Autre</option>
+					</select>
+				</label>
+
+				<label *ngIf="formData.brand === 'Autre'">
+					<span>Nouvelle marque</span>
+					<input type="text" name="newBrand" [(ngModel)]="formData.brand" required />
 				</label>
 
 				<label>

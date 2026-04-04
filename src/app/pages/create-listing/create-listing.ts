@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
+import { BrandService } from '../../services/brand.service';
 
 @Component({
   selector: 'app-create-listing',
@@ -10,8 +11,9 @@ import { ListingService } from '../../services/listing.service';
   templateUrl: './create-listing.html',
   styleUrl: './create-listing.scss',
 })
-export class CreateListing {
+export class CreateListing implements OnInit {
   private readonly listingService = inject(ListingService);
+  private readonly brandService = inject(BrandService);
 
   readonly listingTypes = Object.values(ListingType);
   readonly listingType = ListingType;
@@ -31,10 +33,22 @@ export class CreateListing {
     imageUrls: [],
   };
 
+  brands: string[] = [];
   imageUrlsInput = '';
   loading = false;
   successMsg = '';
   errorMsg = '';
+
+  ngOnInit(): void {
+    this.brandService.getBrands().subscribe({
+      next: (brands) => {
+        this.brands = brands || [];
+      },
+      error: () => {
+        this.brands = [];
+      },
+    });
+  }
 
   onTypeChange(): void {
     if (this.formData.type !== ListingType.SALE) {
