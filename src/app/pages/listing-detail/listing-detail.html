@@ -1,3 +1,7 @@
+	<!-- DEBUG : Données brutes de l'annonce -->
+	<pre *ngIf="listing">{{ listing | json }}</pre>
+
+
 <div class="listing-detail" *ngIf="!loading && listing; else loadingTpl">
 	<!-- Titre -->
 	<section class="section-title" *ngIf="listing.title">
@@ -30,14 +34,29 @@
 	<section class="section-details">
 		<h3>Détails</h3>
 		<ul>
-						<li *ngIf="listing.seller?.surnom || listing.sellerName || listing.username">
-								<b>Vendeur:</b>
-								<ng-container *ngIf="listing.seller?.surnom; else sellerNameTpl">{{ listing.seller?.surnom }}</ng-container>
-								<ng-template #sellerNameTpl>
-									<ng-container *ngIf="listing.sellerName; else usernameTpl">{{ listing.sellerName }}</ng-container>
-								</ng-template>
-								<ng-template #usernameTpl>{{ listing.username }}</ng-template>
-						</li>
+			<li *ngIf="listing.seller?.surnom || listing.sellerName || listing.username">
+				<b>Vendeur:</b>
+				<ng-container *ngIf="listing.seller?.surnom; else sellerNameTpl">{{ listing.seller?.surnom }}</ng-container>
+				<ng-template #sellerNameTpl>
+					<ng-container *ngIf="listing.sellerName; else usernameTpl">{{ listing.sellerName }}</ng-container>
+				</ng-template>
+				<ng-template #usernameTpl>{{ listing.username }}</ng-template>
+			</li>
+		</ul>
+	</section>
+
+	<!-- Composition -->
+	<section class="section-compositions" *ngIf="listing.compositions && listing.compositions.length">
+		<h3>Composition</h3>
+		<ul>
+			<li *ngFor="let comp of listing.compositions">
+				<ng-container *ngIf="comp.compositionId">
+					{{ compName(comp.compositionId) }}<span *ngIf="comp.percentage"> : {{ comp.percentage }}%</span>
+				</ng-container>
+				<ng-container *ngIf="comp.customComposition">
+					{{ comp.customComposition }}<span *ngIf="comp.percentage"> : {{ comp.percentage }}%</span>
+				</ng-container>
+			</li>
 		</ul>
 	</section>
 </div>

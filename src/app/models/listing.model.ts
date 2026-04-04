@@ -14,6 +14,7 @@ export interface Listing {
   description: string;
   brand: BrandRef;
   composition: string;
+  compositions?: any[];
   color: string;
   weight: string;
   length: string;

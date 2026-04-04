@@ -1,3 +1,4 @@
+import { CompositionService } from '../../services/composition.service';
 // Correction : une seule déclaration/export de la classe ListingDetail
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -19,6 +20,9 @@ export class ListingDetail implements OnInit {
   error?: string;
   listingType = ListingType;
 
+  compositionsList: { id: number; name: string }[] = [];
+  private readonly compositionService = inject(CompositionService);
+
   constructor(
     private route: ActivatedRoute,
     private listingService: ListingService,
@@ -26,6 +30,17 @@ export class ListingDetail implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Charger la liste des compositions pour affichage des noms
+    this.compositionService.getCompositions().subscribe({
+      next: (data) => {
+        this.compositionsList = Array.isArray(data) ? data : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.compositionsList = [];
+        this.cdr.detectChanges();
+      }
+    });
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (!id) {
@@ -49,6 +64,10 @@ export class ListingDetail implements OnInit {
       });
     });
   }
+    compName(id: number): string {
+      const found = this.compositionsList.find(c => c.id === id);
+      return found ? found.name : 'Matériau #' + id;
+    }
   isBrandObject(brand: any): brand is { id: number; name: string } {
     return brand && typeof brand === 'object' && 'name' in brand;
   }
