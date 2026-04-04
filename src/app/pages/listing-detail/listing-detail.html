@@ -1,0 +1,27 @@
+<div class="listing-detail" *ngIf="listing$ | async as listing; else loading">
+	<h2>{{ listing.title }}</h2>
+	<div class="meta">
+		<span class="type">{{ listing.type }}</span>
+		<span class="city">{{ listing.city }}</span>
+		<span class="brand">Marque : {{ listing.brand }}</span>
+	</div>
+	<div class="images" *ngIf="listing.imageUrls?.length">
+		<img *ngFor="let url of listing.imageUrls" [src]="url" alt="Image annonce" />
+	</div>
+	<p class="desc">{{ listing.description }}</p>
+	<ul class="details">
+		<li><b>Composition :</b> {{ listing.composition }}</li>
+		<li><b>Couleur :</b> {{ listing.color }}</li>
+		<li><b>Poids :</b> {{ listing.weight }}</li>
+		<li><b>Longueur :</b> {{ listing.length }}</li>
+		<li *ngIf="listing.type === listingType.SALE"><b>Prix :</b> {{ listing.price }} €</li>
+		<li><b>Code postal :</b> {{ listing.postalCode }}</li>
+	</ul>
+	<div class="dates">
+		<span *ngIf="listing.createdAt">Créée le : {{ listing.createdAt | date:'short' }}</span>
+		<span *ngIf="listing.updatedAt"> | Modifiée le : {{ listing.updatedAt | date:'short' }}</span>
+	</div>
+</div>
+<ng-template #loading>
+	<div class="loading">Chargement...</div>
+</ng-template>
