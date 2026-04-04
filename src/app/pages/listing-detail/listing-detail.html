@@ -1,26 +1,42 @@
 <div class="listing-detail" *ngIf="!loading && listing; else loadingTpl">
-	<h2>{{ listing.title }}</h2>
-	<div class="meta">
-		<span class="type">{{ listing.type }}</span>
-		<span class="city">{{ listing.city }}</span>
-		<span class="brand">Marque : {{ listing.brand }}</span>
-	</div>
-	<div class="images" *ngIf="listing.imageUrls?.length">
-		<img *ngFor="let url of listing.imageUrls" [src]="url" alt="Image annonce" />
-	</div>
-	<p class="desc">{{ listing.description }}</p>
-	<ul class="details">
-		<li><b>Composition :</b> {{ listing.composition }}</li>
-		<li><b>Couleur :</b> {{ listing.color }}</li>
-		<li><b>Poids :</b> {{ listing.weight }}</li>
-		<li><b>Longueur :</b> {{ listing.length }}</li>
-		<li *ngIf="listing.type === listingType.SALE"><b>Prix :</b> {{ listing.price }} €</li>
-		<li><b>Code postal :</b> {{ listing.postalCode }}</li>
-	</ul>
-	<div class="dates">
-		<span *ngIf="listing.createdAt">Créée le : {{ listing.createdAt | date:'short' }}</span>
-		<span *ngIf="listing.updatedAt"> | Modifiée le : {{ listing.updatedAt | date:'short' }}</span>
-	</div>
+	<!-- Titre -->
+	<section class="section-title" *ngIf="listing.title">
+		<h2>{{ listing.title }}</h2>
+	</section>
+
+	<!-- Description -->
+	<section class="section-desc" *ngIf="listing.description">
+		<h3>Description</h3>
+		<p>{{ listing.description }}</p>
+	</section>
+
+	<!-- Prix -->
+	<section class="section-price" *ngIf="listing.price != null">
+		<h3>Prix</h3>
+		<p>{{ listing.price }} €</p>
+	</section>
+
+	<!-- Localisation -->
+	<section class="section-location" *ngIf="listing.city || listing.postalCode">
+		<h3>Localisation</h3>
+		<p>
+			<span *ngIf="listing.city">{{ listing.city }}</span>
+			<span *ngIf="listing.city && listing.postalCode">, </span>
+			<span *ngIf="listing.postalCode">{{ listing.postalCode }}</span>
+		</p>
+	</section>
+
+	<!-- Caractéristiques -->
+	<section class="section-details">
+		<h3>Détails</h3>
+		<ul>
+			<li *ngIf="listing.weight"><b>Poids :</b> {{ listing.weight }}</li>
+			<li *ngIf="listing.length"><b>Longueur :</b> {{ listing.length }}</li>
+			<li *ngIf="listing.brand?.name || listing.customBrand">
+				<b>Marque :</b> {{ listing.brand?.name || listing.customBrand }}
+			</li>
+		</ul>
+	</section>
 </div>
 <ng-template #loadingTpl>
 	<div class="loading" *ngIf="loading">Chargement...</div>
