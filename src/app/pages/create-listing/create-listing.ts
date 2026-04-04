@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule, NgForm, FormControl, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CompositionService } from '../../services/composition.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -59,7 +59,6 @@ export class CreateListing implements OnInit {
   brands: { id: number; name: string }[] = [];
   selectedBrand: string = '';
   newBrand: string = '';
-  brandCtrl = new FormControl('');
   filteredBrands$: Observable<{ id: number; name: string }[]> = of([]);
   showOtherOption = true;
   imageUrlsInput = '';
@@ -71,18 +70,32 @@ export class CreateListing implements OnInit {
     this.form = this.fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
-      brand: ['', Validators.required],
+      brand: ['', this.brandValidator.bind(this)],
       newBrand: [''],
       color: ['', Validators.required],
       weightValue: [null, [Validators.required, Validators.pattern('^[0-9]+$'), Validators.min(1)]],
-      length: ['', Validators.required],
+      length: [null, [Validators.required, Validators.pattern('^[0-9]+([.][0-9]+)?$'), Validators.min(0)]],
       type: [ListingType.SALE, Validators.required],
-      price: [null],
+      price: [null, [Validators.required, Validators.min(0)]],
       city: ['', Validators.required],
       postalCode: ['', Validators.required],
       imageUrls: [''],
       compositions: this.fb.array([])
     });
+
+  }
+
+  brandValidator(control: AbstractControl): ValidationErrors | null {
+    if (control.value === 'Autre') {
+      const newBrandValue = this.form?.get('newBrand')?.value;
+      if (!newBrandValue || newBrandValue.trim() === '') {
+        return { required: true };
+      }
+    }
+    if (!control.value || control.value.trim() === '') {
+      return { required: true };
+    }
+    return null;
   }
 
   ngOnInit(): void {
@@ -113,11 +126,37 @@ export class CreateListing implements OnInit {
       },
     });
 
-    this.filteredBrands$ = this.brandCtrl.valueChanges.pipe(
-      startWith(''),
+    const brandControl = this.form.get('brand');
+    const newBrandControl = this.form.get('newBrand');
+
+    this.filteredBrands$ = (brandControl?.valueChanges ?? of('')).pipe(
+      startWith(brandControl?.value ?? ''),
       debounceTime(300),
-      switchMap(value => this.searchBrands(value || ''))
+      switchMap(value => this.searchBrands(typeof value === 'string' ? value : ''))
     );
+
+    brandControl?.valueChanges.subscribe((value) => {
+      const isOther = value === 'Autre';
+      this.selectedBrand = isOther ? 'Autre' : '';
+      this.showOtherOption = !isOther;
+
+      if (isOther) {
+        newBrandControl?.setValidators([Validators.required]);
+      } else {
+        newBrandControl?.clearValidators();
+        newBrandControl?.setValue('');
+      }
+      newBrandControl?.updateValueAndValidity({ emitEvent: false });
+      brandControl.updateValueAndValidity({ emitEvent: false });
+    });
+
+    // Le validateur de brand dépend de newBrand dans le cas "Autre".
+    // Il faut donc revalider brand à chaque saisie de newBrand.
+    newBrandControl?.valueChanges.subscribe(() => {
+      if (brandControl?.value === 'Autre') {
+        brandControl.updateValueAndValidity({ emitEvent: false });
+      }
+    });
 
     // Ajoute une composition par défaut
     if (this.compositions.length === 0) {
@@ -153,21 +192,26 @@ export class CreateListing implements OnInit {
   onBrandSelected(event: MatAutocompleteSelectedEvent) {
     this.selectedBrand = event.option.value;
     this.showOtherOption = this.selectedBrand !== 'Autre';
-    // Synchronise la valeur avec le champ du formulaire réactif
-    this.form.get('brand')?.setValue(this.selectedBrand !== 'Autre' ? this.selectedBrand : '');
+    this.form.get('brand')?.setValue(this.selectedBrand);
   }
 
   onBrandBlur() {
-    if (this.brandCtrl.value === 'Autre') {
+    if (this.form.get('brand')?.value === 'Autre') {
       this.selectedBrand = 'Autre';
       this.showOtherOption = false;
     }
   }
 
   onTypeChange(): void {
-    if (this.formData.type !== ListingType.SALE) {
-      this.formData.price = null;
+    const type = this.form.get('type')?.value;
+    const priceCtrl = this.form.get('price');
+    if (type === ListingType.SALE) {
+      priceCtrl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      priceCtrl?.clearValidators();
+      priceCtrl?.setValue(null);
     }
+    priceCtrl?.updateValueAndValidity();
   }
 
   onSubmit(): void {
@@ -180,8 +224,17 @@ export class CreateListing implements OnInit {
     this.successMsg = '';
     this.errorMsg = '';
 
-    // Préparer le payload
     const formValue = this.form.value;
+    const brandValue = String(formValue.brand ?? '').trim();
+    const newBrandValue = String(formValue.newBrand ?? '').trim();
+    const isOtherBrand = brandValue === 'Autre';
+
+    if (isOtherBrand && !newBrandValue) {
+      this.loading = false;
+      this.errorMsg = 'Veuillez saisir la nouvelle marque.';
+      return;
+    }
+
     const compositionsPayload = formValue.compositions.map((c: any) => {
       if (c.compositionId === 'Autre' || !c.compositionId) {
         return {
@@ -196,35 +249,83 @@ export class CreateListing implements OnInit {
       }
     });
 
-    // Envoie le poids et l'unité tels que saisis, sans conversion
+    // Construction stricte du payload selon le format attendu
     let payload: any = {
-      ...formValue,
+      title: formValue.title,
+      description: formValue.description,
+      brandId: null,
+      color: formValue.color,
       weight: Number(formValue.weightValue),
       weightUnit: 'g',
-      compositions: compositionsPayload,
+      length: formValue.length ? Number(formValue.length) : undefined,
+      type: formValue.type, // à adapter si besoin (ex: 'VETEMENT')
+      price: formValue.price,
+      city: formValue.city,
+      postalCode: formValue.postalCode,
       imageUrls: (formValue.imageUrls || '').split(',').map((url: string) => url.trim()).filter((url: string) => !!url),
+      compositions: compositionsPayload
     };
-    // Supprime les champs du formulaire qui ne doivent pas être envoyés au backend
-    delete payload.weightValue;
-    delete payload.weightUnit;
-    console.log('Payload envoyé à l\'API:', payload);
+    // Ajout du champ composition si présent dans le formulaire (texte libre)
+    if (formValue.composition && formValue.composition.trim() !== '') {
+      payload.composition = formValue.composition;
+    }
 
-    // Gestion de la marque
-    if (this.selectedBrand === 'Autre') {
-      delete payload.brand;
-      payload.customBrand = this.newBrand;
-    } else if (this.selectedBrand) {
-      const found = this.brands.find(b => b.name === this.selectedBrand || b.id === Number(this.selectedBrand));
+      // (Bloc supprimé : gestion de la marque déjà faite plus haut)
+
+    // Mapping strict de la marque pour le backend.
+    if (isOtherBrand) {
+      payload.brandId = null;
+      payload.customBrand = newBrandValue;
+    } else {
+      const found = this.brands.find(b => b.name === brandValue || b.id === Number(brandValue));
       if (found) {
         payload.brandId = found.id;
-        delete payload.brand;
       }
+      delete payload.customBrand;
+    }
+
+    // Ne jamais envoyer les champs de formulaire bruts.
+    delete payload.brand;
+    delete payload.newBrand;
+
+    // Ne pas envoyer length si vide
+    if (payload.length === undefined || payload.length === null || payload.length === '') {
+      delete payload.length;
+    }
+    // Ne pas envoyer composition si vide
+    if (!payload.composition || payload.composition.trim() === '') {
+      delete payload.composition;
+    }
+    // Ne pas envoyer price si null
+    if (payload.price === null || payload.price === undefined || payload.price === '') {
+      delete payload.price;
+    }
+    // Ne pas envoyer compositions si vide
+    if (!payload.compositions || !Array.isArray(payload.compositions) || payload.compositions.length === 0) {
+      delete payload.compositions;
+    }
+    // Affichage debug détaillé
+    console.log('Payload envoyé à l\'API:', payload);
+    console.log('[DEBUG] Champs marque envoyés:', {
+      brandId: payload.brandId,
+      customBrand: payload.customBrand,
+      formBrand: brandValue,
+      formNewBrand: newBrandValue,
+      isOtherBrand
+    });
+
+    // Nettoyage des champs optionnels pour éviter d'envoyer null
+    if (payload.customBrand == null || payload.customBrand === '') {
+      delete payload.customBrand;
+    }
+    if (payload.composition == null || payload.composition === '') {
+      delete payload.composition;
     }
 
     if (formValue.type === ListingType.SALE && formValue.price != null) {
       payload.price = formValue.price;
     } else {
-      delete payload.price;
+      payload.price = null; // Set price to null for non-SALE types
     }
 
     // Ajout du sellerId si utilisateur connecté

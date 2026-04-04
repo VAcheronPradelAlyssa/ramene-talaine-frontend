@@ -25,9 +25,9 @@
 					<input
 						type="text"
 						matInput
-						[formControl]="brandCtrl"
+						formControlName="brand"
 						[matAutocomplete]="auto"
-						[required]="true"
+						required
 						(blur)="onBrandBlur()"
 					/>
 					<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBrandSelected($event)">
@@ -53,13 +53,10 @@
 											<select formControlName="compositionId" required>
 												<option value="" disabled>Choisir une composition</option>
 												<option *ngFor="let comp of compositionsList" [value]="comp.id">{{ comp.name }}</option>
-												<option value="Autre">Autre</option>
+												<!-- <option value="Autre">Autre</option> -->
 											</select>
 										</label>
-										<label *ngIf="compCtrl.get('compositionId')?.value === 'Autre'">
-											<span>Nouvelle composition</span>
-											<input type="text" formControlName="customComposition" placeholder="Précisez la composition" required />
-										</label>
+										<!-- Champ "Nouvelle composition" supprimé car choix "Autre" retiré -->
 										<label>
 											<span>Pourcentage (optionnel)</span>
 											<input type="number" formControlName="percentage" min="0" max="100" placeholder="%" />
@@ -88,9 +85,9 @@
 
 								<label>
 										<span>Longueur</span>
-										<input type="text" formControlName="length" required />
+										<input type="number" formControlName="length" min="0" step="0.01" required />
 										<div class="error" *ngIf="form.get('length')?.invalid && (form.get('length')?.touched || submitted)">
-											Ce champ est obligatoire.
+											Saisir une longueur numerique valide (0 ou plus).
 										</div>
 								</label>
 
@@ -101,10 +98,13 @@
 					</select>
 				</label>
 
-				<label *ngIf="form.get('type')?.value === listingType.SALE">
-					<span>Prix</span>
-					<input type="number" formControlName="price" min="0" required />
-				</label>
+				   <label *ngIf="form.get('type')?.value === listingType.SALE">
+					   <span>Prix</span>
+					   <input type="number" formControlName="price" min="0" />
+					   <div class="error" *ngIf="form.get('price')?.invalid && (form.get('price')?.touched || submitted)">
+						   Saisir un prix (obligatoire pour la vente).
+					   </div>
+				   </label>
 
 								<label>
 										<span>Ville</span>

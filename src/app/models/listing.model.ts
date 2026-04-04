@@ -13,6 +13,8 @@ export interface Listing {
   title: string;
   description: string;
   brand: BrandRef;
+  brandId?: number | null;
+  customBrand?: string | null;
   composition: string;
   compositions?: any[];
   color: string;

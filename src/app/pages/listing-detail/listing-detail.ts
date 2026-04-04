@@ -71,4 +71,20 @@ export class ListingDetail implements OnInit {
   isBrandObject(brand: any): brand is { id: number; name: string } {
     return brand && typeof brand === 'object' && 'name' in brand;
   }
+
+  getBrandLabel(listing: Listing): string | null {
+    if (listing.customBrand && listing.customBrand.trim() !== '') {
+      return listing.customBrand;
+    }
+
+    if (this.isBrandObject(listing.brand)) {
+      return listing.brand.name;
+    }
+
+    if (typeof listing.brand === 'string' && listing.brand.trim() !== '') {
+      return listing.brand;
+    }
+
+    return null;
+  }
 }
