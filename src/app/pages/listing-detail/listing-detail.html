@@ -1,4 +1,4 @@
-<div class="listing-detail" *ngIf="listing$ | async as listing; else loading">
+<div class="listing-detail" *ngIf="!loading && listing; else loadingTpl">
 	<h2>{{ listing.title }}</h2>
 	<div class="meta">
 		<span class="type">{{ listing.type }}</span>
@@ -22,6 +22,7 @@
 		<span *ngIf="listing.updatedAt"> | Modifiée le : {{ listing.updatedAt | date:'short' }}</span>
 	</div>
 </div>
-<ng-template #loading>
-	<div class="loading">Chargement...</div>
+<ng-template #loadingTpl>
+	<div class="loading" *ngIf="loading">Chargement...</div>
+	<div class="error" *ngIf="error">{{ error }}</div>
 </ng-template>
