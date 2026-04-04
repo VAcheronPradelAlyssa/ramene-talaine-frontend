@@ -4,11 +4,15 @@ export enum ListingType {
   FREE = 'FREE',
 }
 
+import type { User } from './user.model';
+
+export type BrandRef = string | { id: number; name: string };
+
 export interface Listing {
   id?: string;
   title: string;
   description: string;
-  brand: string;
+  brand: BrandRef;
   composition: string;
   color: string;
   weight: string;
@@ -20,4 +24,7 @@ export interface Listing {
   imageUrls: string[];
   createdAt?: Date;
   updatedAt?: Date;
+  sellerName?: string;
+  seller?: User;
+  username?: string;
 }

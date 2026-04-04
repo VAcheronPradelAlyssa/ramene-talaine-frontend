@@ -30,11 +30,14 @@
 	<section class="section-details">
 		<h3>Détails</h3>
 		<ul>
-			<li *ngIf="listing.weight"><b>Poids :</b> {{ listing.weight }}</li>
-			<li *ngIf="listing.length"><b>Longueur :</b> {{ listing.length }}</li>
-			<li *ngIf="listing.brand">
-				<b>Marque :</b> {{ listing.brand }}
-			</li>
+						<li *ngIf="listing.seller?.surnom || listing.sellerName || listing.username">
+								<b>Vendeur:</b>
+								<ng-container *ngIf="listing.seller?.surnom; else sellerNameTpl">{{ listing.seller?.surnom }}</ng-container>
+								<ng-template #sellerNameTpl>
+									<ng-container *ngIf="listing.sellerName; else usernameTpl">{{ listing.sellerName }}</ng-container>
+								</ng-template>
+								<ng-template #usernameTpl>{{ listing.username }}</ng-template>
+						</li>
 		</ul>
 	</section>
 </div>

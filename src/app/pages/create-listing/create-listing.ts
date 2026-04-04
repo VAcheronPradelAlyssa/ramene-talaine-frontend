@@ -9,9 +9,11 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 import { BrandService } from '../../services/brand.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-create-listing',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -26,6 +28,7 @@ import { BrandService } from '../../services/brand.service';
 export class CreateListing implements OnInit {
   private readonly listingService = inject(ListingService);
   private readonly brandService = inject(BrandService);
+  private readonly authService = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly listingTypes = Object.values(ListingType);
@@ -46,7 +49,6 @@ export class CreateListing implements OnInit {
     imageUrls: [],
   };
 
-
   brands: { id: number; name: string }[] = [];
   selectedBrand: string = '';
   newBrand: string = '';
@@ -57,7 +59,6 @@ export class CreateListing implements OnInit {
   loading = false;
   successMsg = '';
   errorMsg = '';
-
 
   ngOnInit(): void {
     this.brandService.getBrands().subscribe({
@@ -141,6 +142,13 @@ export class CreateListing implements OnInit {
       delete payload.price;
     }
 
+    // Ajout du sellerId si utilisateur connecté
+    const user = (this.authService as any)._currentUser?.value;
+    console.log('User courant pour sellerId:', user); // log temporaire pour debug
+    if (user && user.id) {
+      payload.sellerId = user.id;
+    }
+
     this.listingService.createListing(payload).subscribe({
       next: () => {
         this.successMsg = 'Annonce creee avec succes.';
@@ -163,10 +171,14 @@ export class CreateListing implements OnInit {
           imageUrls: [],
         };
         this.imageUrlsInput = '';
+        this.selectedBrand = '';
+        this.newBrand = '';
+        this.cdr.detectChanges();
       },
       error: (error: any) => {
         this.errorMsg = error?.error?.message || 'Erreur lors de la creation de l\'annonce.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

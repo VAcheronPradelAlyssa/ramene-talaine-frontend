@@ -1,3 +1,4 @@
+// Correction : une seule déclaration/export de la classe ListingDetail
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -47,5 +48,8 @@ export class ListingDetail implements OnInit {
         }
       });
     });
+  }
+  isBrandObject(brand: any): brand is { id: number; name: string } {
+    return brand && typeof brand === 'object' && 'name' in brand;
   }
 }
