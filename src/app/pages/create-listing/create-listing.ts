@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule, NgForm, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, NgForm, FormControl, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CompositionService } from '../../services/composition.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,6 +27,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './create-listing.scss',
 })
 export class CreateListing implements OnInit {
+  form: FormGroup;
   compositionAutre: string = '';
   compositionsList: { id: number; name: string }[] = [];
   compositionsError: any = null;
@@ -65,6 +66,24 @@ export class CreateListing implements OnInit {
   successMsg = '';
   errorMsg = '';
 
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      brand: ['', Validators.required],
+      newBrand: [''],
+      color: ['', Validators.required],
+      weight: ['', Validators.required],
+      length: ['', Validators.required],
+      type: [ListingType.SALE, Validators.required],
+      price: [null],
+      city: ['', Validators.required],
+      postalCode: ['', Validators.required],
+      imageUrls: [''],
+      compositions: this.fb.array([])
+    });
+  }
+
   ngOnInit(): void {
     // Récupération dynamique des compositions
     this.compositionService.getCompositions().subscribe({
@@ -98,10 +117,28 @@ export class CreateListing implements OnInit {
       debounceTime(300),
       switchMap(value => this.searchBrands(value || ''))
     );
+
+    // Ajoute une composition par défaut
+    if (this.compositions.length === 0) {
+      this.addComposition();
+    }
   }
 
-  // ... (toutes les autres méthodes du composant ici, inchangées)
+  get compositions(): FormArray {
+    return this.form.get('compositions') as FormArray;
+  }
 
+  addComposition(): void {
+    this.compositions.push(this.fb.group({
+      compositionId: [''],
+      customComposition: [''],
+      percentage: ['']
+    }));
+  }
+
+  removeComposition(index: number): void {
+    this.compositions.removeAt(index);
+  }
 
   searchBrands(query: string): Observable<{ id: number; name: string }[]> {
     if (!query || query === 'Autre') {
@@ -115,6 +152,8 @@ export class CreateListing implements OnInit {
   onBrandSelected(event: MatAutocompleteSelectedEvent) {
     this.selectedBrand = event.option.value;
     this.showOtherOption = this.selectedBrand !== 'Autre';
+    // Synchronise la valeur avec le champ du formulaire réactif
+    this.form.get('brand')?.setValue(this.selectedBrand !== 'Autre' ? this.selectedBrand : '');
   }
 
   onBrandBlur() {
@@ -130,41 +169,42 @@ export class CreateListing implements OnInit {
     }
   }
 
-  onSubmit(form: NgForm): void {
-    if (!form.valid || this.loading) {
+  onSubmit(): void {
+    if (this.form.invalid || this.loading) {
       return;
     }
-    // Préparer le payload selon le choix de la marque
     this.loading = true;
     this.successMsg = '';
     this.errorMsg = '';
 
-
-    // Gérer la valeur de composition
-
-    let compositionValue;
-    if (this.formData.composition === 'Autre') {
-      compositionValue = this.compositionAutre;
-    } else {
-      // Cherche l'objet complet dans la liste
-      const found = this.compositionsList.find(c => c.id === Number(this.formData.composition) || c.name === this.formData.composition);
-      compositionValue = found ? found : this.formData.composition;
-    }
+    // Préparer le payload
+    const formValue = this.form.value;
+    const compositionsPayload = formValue.compositions.map((c: any) => {
+      if (c.compositionId === 'Autre' || !c.compositionId) {
+        return {
+          customComposition: c.customComposition,
+          percentage: c.percentage || null
+        };
+      } else {
+        return {
+          compositionId: Number(c.compositionId),
+          percentage: c.percentage || null
+        };
+      }
+    });
 
     let payload: any = {
-      ...this.formData,
-      composition: compositionValue,
-      imageUrls: this.imageUrlsInput
-        .split(',')
-        .map((url: string) => url.trim())
-        .filter((url: string) => !!url),
+      ...formValue,
+      compositions: compositionsPayload,
+      imageUrls: (formValue.imageUrls || '').split(',').map((url: string) => url.trim()).filter((url: string) => !!url),
     };
+    console.log('Payload envoyé à l\'API:', payload);
 
+    // Gestion de la marque
     if (this.selectedBrand === 'Autre') {
       delete payload.brand;
       payload.customBrand = this.newBrand;
     } else if (this.selectedBrand) {
-      // Recherche l'id de la marque par le nom (car l'autocomplete renvoie le nom)
       const found = this.brands.find(b => b.name === this.selectedBrand || b.id === Number(this.selectedBrand));
       if (found) {
         payload.brandId = found.id;
@@ -172,15 +212,14 @@ export class CreateListing implements OnInit {
       }
     }
 
-    if (this.formData.type === ListingType.SALE && this.formData.price != null) {
-      payload.price = this.formData.price;
+    if (formValue.type === ListingType.SALE && formValue.price != null) {
+      payload.price = formValue.price;
     } else {
       delete payload.price;
     }
 
     // Ajout du sellerId si utilisateur connecté
     const user = (this.authService as any)._currentUser?.value;
-    console.log('User courant pour sellerId:', user); // log temporaire pour debug
     if (user && user.id) {
       payload.sellerId = user.id;
     }
@@ -189,24 +228,12 @@ export class CreateListing implements OnInit {
       next: () => {
         this.successMsg = 'Annonce creee avec succes.';
         this.loading = false;
-        form.resetForm({
-          type: ListingType.SALE,
-        });
-        this.formData = {
-          title: '',
-          description: '',
-          brand: '',
-          composition: '',
-          color: '',
-          weight: '',
-          length: '',
-          type: ListingType.SALE,
-          price: null,
-          city: '',
-          postalCode: '',
-          imageUrls: [],
-        };
-        this.imageUrlsInput = '';
+        this.form.reset({ type: ListingType.SALE });
+        // Réinitialise le FormArray
+        while (this.compositions.length > 0) {
+          this.compositions.removeAt(0);
+        }
+        this.addComposition();
         this.selectedBrand = '';
         this.newBrand = '';
         this.cdr.detectChanges();

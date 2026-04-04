@@ -2,15 +2,15 @@
 	<div class="listing-card">
 		<h1>Creer une annonce</h1>
 
-		<form #listingForm="ngForm" (ngSubmit)="onSubmit(listingForm)" class="listing-form" novalidate>
+		<form [formGroup]="form" (ngSubmit)="onSubmit()" class="listing-form" novalidate>
 			<label>
 				<span>Titre</span>
-				<input type="text" name="title" [(ngModel)]="formData.title" required />
+				<input type="text" formControlName="title" required />
 			</label>
 
 			<label>
 				<span>Description</span>
-				<textarea name="description" [(ngModel)]="formData.description" rows="4" required></textarea>
+				<textarea formControlName="description" rows="4" required></textarea>
 			</label>
 
 			<div class="grid-2">
@@ -22,7 +22,6 @@
 						[formControl]="brandCtrl"
 						[matAutocomplete]="auto"
 						[required]="true"
-						[readonly]="selectedBrand === 'Autre'"
 						(blur)="onBrandBlur()"
 					/>
 					<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBrandSelected($event)">
@@ -36,81 +35,82 @@
 				<div *ngIf="selectedBrand === 'Autre'">
 					<mat-form-field appearance="outline" class="full-width">
 						<mat-label>Nouvelle marque</mat-label>
-						<input matInput [(ngModel)]="newBrand" name="newBrand" required />
+						<input matInput formControlName="newBrand" required />
 					</mat-form-field>
 				</div>
 
 
-								<label>
-									<span>Composition</span>
-									<select name="composition" [(ngModel)]="formData.composition" required>
-										<option value="" disabled selected>Choisir une composition</option>
-										<option *ngFor="let comp of compositionsList" [value]="comp.id">{{ comp.name }}</option>
-										<option value="Autre">Autre</option>
-									</select>
-								</label>
-								<!-- DEBUG: Affichage temporaire des compositions récupérées -->
-								<div style="background:#ffe;border:1px solid #ccc;padding:8px;margin:8px 0;">
-									<strong>DEBUG compositionsList:</strong>
-									<pre>{{ compositionsList | json }}</pre>
-									<div *ngIf="compositionsError" style="color:red;">
-										<strong>Erreur chargement compositions :</strong>
-										<pre>{{ compositionsError | json }}</pre>
+								<div formArrayName="compositions">
+									<div *ngFor="let compCtrl of compositions.controls; let i = index" [formGroupName]="i" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+										<label>
+											<span>Composition</span>
+											<select formControlName="compositionId" required>
+												<option value="" disabled>Choisir une composition</option>
+												<option *ngFor="let comp of compositionsList" [value]="comp.id">{{ comp.name }}</option>
+												<option value="Autre">Autre</option>
+											</select>
+										</label>
+										<label *ngIf="compCtrl.get('compositionId')?.value === 'Autre'">
+											<span>Nouvelle composition</span>
+											<input type="text" formControlName="customComposition" placeholder="Précisez la composition" required />
+										</label>
+										<label>
+											<span>Pourcentage (optionnel)</span>
+											<input type="number" formControlName="percentage" min="0" max="100" placeholder="%" />
+										</label>
+										<button type="button" (click)="removeComposition(i)" *ngIf="compositions.length > 1">Supprimer</button>
 									</div>
+									<button type="button" (click)="addComposition()">Ajouter une composition</button>
 								</div>
-								<label *ngIf="formData.composition === 'Autre'">
-									<span>Nouvelle composition</span>
-									<input type="text" name="compositionAutre" [(ngModel)]="compositionAutre" placeholder="Précisez la composition" required />
-								</label>
 
 				<label>
 					<span>Couleur</span>
-					<input type="text" name="color" [(ngModel)]="formData.color" required />
+					<input type="text" formControlName="color" required />
 				</label>
 
 				<label>
 					<span>Poids</span>
-					<input type="text" name="weight" [(ngModel)]="formData.weight" required />
+					<input type="text" formControlName="weight" required />
 				</label>
 
 				<label>
 					<span>Longueur</span>
-					<input type="text" name="length" [(ngModel)]="formData.length" required />
+					<input type="text" formControlName="length" required />
 				</label>
 
 				<label>
 					<span>Type</span>
-					<select name="type" [(ngModel)]="formData.type" (ngModelChange)="onTypeChange()" required>
+					<select formControlName="type" (change)="onTypeChange()" required>
 						<option *ngFor="let type of listingTypes" [ngValue]="type">{{ type }}</option>
 					</select>
 				</label>
 
-				<label *ngIf="formData.type === listingType.SALE">
+				<label *ngIf="form.get('type')?.value === listingType.SALE">
 					<span>Prix</span>
-					<input type="number" name="price" [(ngModel)]="formData.price" min="0" required />
+					<input type="number" formControlName="price" min="0" required />
 				</label>
 
 				<label>
 					<span>Ville</span>
-					<input type="text" name="city" [(ngModel)]="formData.city" required />
+					<input type="text" formControlName="city" required />
 				</label>
 
 				<label>
 					<span>Code postal</span>
-					<input type="text" name="postalCode" [(ngModel)]="formData.postalCode" required />
+					<input type="text" formControlName="postalCode" required />
 				</label>
 			</div>
 
 			<label>
 				<span>Images (URLs separees par des virgules)</span>
-				<input type="text" name="imageUrls" [(ngModel)]="imageUrlsInput" placeholder="https://..., https://..." />
+				<input type="text" formControlName="imageUrls" placeholder="https://..., https://..." />
 			</label>
 
 			<p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
 			<p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
 
-			<button type="submit" [disabled]="loading || listingForm.invalid">
-				{{ loading ? 'Creation...' : 'Creer l\'annonce' }}
+			<button type="submit">
+				{{ loading ? 'Création...' : "Créer l'annonce" }}
 			</button>
 		</form>
 	</div>
