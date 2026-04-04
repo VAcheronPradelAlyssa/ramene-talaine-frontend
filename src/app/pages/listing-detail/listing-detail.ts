@@ -8,7 +8,7 @@ import { NgIf, NgFor } from '@angular/common';
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor],
+  imports: [CommonModule, NgIf],
   templateUrl: './listing-detail.html',
   styleUrl: './listing-detail.scss',
 })

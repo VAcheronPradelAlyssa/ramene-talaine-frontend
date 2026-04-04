@@ -32,8 +32,8 @@
 		<ul>
 			<li *ngIf="listing.weight"><b>Poids :</b> {{ listing.weight }}</li>
 			<li *ngIf="listing.length"><b>Longueur :</b> {{ listing.length }}</li>
-			<li *ngIf="listing.brand?.name || listing.customBrand">
-				<b>Marque :</b> {{ listing.brand?.name || listing.customBrand }}
+			<li *ngIf="listing.brand">
+				<b>Marque :</b> {{ listing.brand }}
 			</li>
 		</ul>
 	</section>

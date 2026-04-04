@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { BehaviorSubject, finalize, timeout, takeUntil, Subject } from 'rxjs';
 import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
@@ -8,7 +8,7 @@ import { ListingService } from '../../services/listing.service';
 
 @Component({
   selector: 'app-listings',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './listings.html',
   styleUrl: './listings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
