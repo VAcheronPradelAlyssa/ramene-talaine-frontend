@@ -14,18 +14,31 @@
 			</label>
 
 			<div class="grid-2">
-				<label>
-					<span>Marque</span>
-					<select name="brand" [(ngModel)]="selectedBrand" required>
-						<option value="" disabled hidden>-- Sélectionner une marque --</option>
-						<option *ngFor="let brand of brands" [value]="brand.id">{{ brand.name }}</option>
-						<option value="Autre">Autre</option>
-					</select>
-				</label>
-				<label *ngIf="selectedBrand === 'Autre'">
-					<span>Nouvelle marque</span>
-					<input type="text" name="newBrand" [(ngModel)]="newBrand" required />
-				</label>
+				<mat-form-field appearance="outline" class="full-width">
+					<mat-label>Marque</mat-label>
+					<input
+						type="text"
+						matInput
+						[formControl]="brandCtrl"
+						[matAutocomplete]="auto"
+						[required]="true"
+						[readonly]="selectedBrand === 'Autre'"
+						(blur)="onBrandBlur()"
+					/>
+					<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBrandSelected($event)">
+						<mat-option *ngFor="let brand of filteredBrands$ | async" [value]="brand.name">
+							{{ brand.name }}
+						</mat-option>
+						<mat-option *ngIf="showOtherOption" [value]="'Autre'">Autre</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
+
+				<div *ngIf="selectedBrand === 'Autre'">
+					<mat-form-field appearance="outline" class="full-width">
+						<mat-label>Nouvelle marque</mat-label>
+						<input matInput [(ngModel)]="newBrand" name="newBrand" required />
+					</mat-form-field>
+				</div>
 
 				<label>
 					<span>Composition</span>
