@@ -10,13 +10,15 @@
   <div class="listings-grid" *ngIf="!(loading$ | async) && !(errorMsg$ | async)">
     <ng-container *ngIf="listings$ | async as listings">
       <article class="listing-card" *ngFor="let listing of listings">
-        <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
+        <a [routerLink]="['/annonces', listing.id]" class="listing-link">
+          <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
 
-        <div class="listing-body">
-          <h2>{{ listing.title }}</h2>
-          <p class="meta">{{ getTypeLabel(listing) }}</p>
-          <p class="city">{{ listing.city }}</p>
-        </div>
+          <div class="listing-body">
+            <h2>{{ listing.title }}</h2>
+            <p class="meta">{{ getTypeLabel(listing) }}</p>
+            <p class="city">{{ listing.city }}</p>
+          </div>
+        </a>
       </article>
       <p class="state empty" *ngIf="listings.length === 0">Aucune annonce disponible.</p>
     </ng-container>
