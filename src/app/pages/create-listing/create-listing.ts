@@ -27,6 +27,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './create-listing.scss',
 })
 export class CreateListing implements OnInit {
+    submitted = false;
   form: FormGroup;
   compositionAutre: string = '';
   compositionsList: { id: number; name: string }[] = [];
@@ -73,7 +74,7 @@ export class CreateListing implements OnInit {
       brand: ['', Validators.required],
       newBrand: [''],
       color: ['', Validators.required],
-      weight: ['', Validators.required],
+      weightValue: [null, [Validators.required, Validators.pattern('^[0-9]+$'), Validators.min(1)]],
       length: ['', Validators.required],
       type: [ListingType.SALE, Validators.required],
       price: [null],
@@ -170,7 +171,9 @@ export class CreateListing implements OnInit {
   }
 
   onSubmit(): void {
+    this.submitted = true;
     if (this.form.invalid || this.loading) {
+      this.errorMsg = 'Merci de remplir tous les champs obligatoires.';
       return;
     }
     this.loading = true;
@@ -193,11 +196,17 @@ export class CreateListing implements OnInit {
       }
     });
 
+    // Envoie le poids et l'unité tels que saisis, sans conversion
     let payload: any = {
       ...formValue,
+      weight: Number(formValue.weightValue),
+      weightUnit: 'g',
       compositions: compositionsPayload,
       imageUrls: (formValue.imageUrls || '').split(',').map((url: string) => url.trim()).filter((url: string) => !!url),
     };
+    // Supprime les champs du formulaire qui ne doivent pas être envoyés au backend
+    delete payload.weightValue;
+    delete payload.weightUnit;
     console.log('Payload envoyé à l\'API:', payload);
 
     // Gestion de la marque
@@ -229,6 +238,7 @@ export class CreateListing implements OnInit {
         this.successMsg = 'Annonce creee avec succes.';
         this.loading = false;
         this.form.reset({ type: ListingType.SALE });
+        this.submitted = false;
         // Réinitialise le FormArray
         while (this.compositions.length > 0) {
           this.compositions.removeAt(0);
@@ -241,6 +251,7 @@ export class CreateListing implements OnInit {
       error: (error: any) => {
         this.errorMsg = error?.error?.message || 'Erreur lors de la creation de l\'annonce.';
         this.loading = false;
+        // Ne pas reset submitted ici pour garder l'affichage des erreurs
         this.cdr.detectChanges();
       },
     });

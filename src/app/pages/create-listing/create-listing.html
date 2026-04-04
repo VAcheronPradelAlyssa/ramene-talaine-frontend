@@ -3,15 +3,21 @@
 		<h1>Creer une annonce</h1>
 
 		<form [formGroup]="form" (ngSubmit)="onSubmit()" class="listing-form" novalidate>
-			<label>
-				<span>Titre</span>
-				<input type="text" formControlName="title" required />
-			</label>
+						<label>
+								<span>Titre</span>
+								<input type="text" formControlName="title" required />
+								<div class="error" *ngIf="form.get('title')?.invalid && (form.get('title')?.touched || submitted)">
+									Ce champ est obligatoire.
+								</div>
+						</label>
 
-			<label>
-				<span>Description</span>
-				<textarea formControlName="description" rows="4" required></textarea>
-			</label>
+						<label>
+								<span>Description</span>
+								<textarea formControlName="description" rows="4" required></textarea>
+								<div class="error" *ngIf="form.get('description')?.invalid && (form.get('description')?.touched || submitted)">
+									Ce champ est obligatoire.
+								</div>
+						</label>
 
 			<div class="grid-2">
 				<mat-form-field appearance="outline" class="full-width">
@@ -63,20 +69,30 @@
 									<button type="button" (click)="addComposition()">Ajouter une composition</button>
 								</div>
 
-				<label>
-					<span>Couleur</span>
-					<input type="text" formControlName="color" required />
-				</label>
+								<label>
+										<span>Couleur</span>
+										<input type="text" formControlName="color" required />
+										<div class="error" *ngIf="form.get('color')?.invalid && (form.get('color')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 
-				<label>
-					<span>Poids</span>
-					<input type="text" formControlName="weight" required />
-				</label>
 
-				<label>
-					<span>Longueur</span>
-					<input type="text" formControlName="length" required />
-				</label>
+								<label>
+									<span>Poids (g)</span>
+									<input type="number" formControlName="weightValue" min="1" step="1" required style="width: 100px; display: inline-block;" pattern="^[0-9]+$" inputmode="numeric" />
+									<div class="error" *ngIf="form.get('weightValue')?.invalid && (form.get('weightValue')?.touched || submitted)">
+										Saisir un poids en grammes (nombre entier positif).
+									</div>
+								</label>
+
+								<label>
+										<span>Longueur</span>
+										<input type="text" formControlName="length" required />
+										<div class="error" *ngIf="form.get('length')?.invalid && (form.get('length')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 
 				<label>
 					<span>Type</span>
@@ -90,15 +106,21 @@
 					<input type="number" formControlName="price" min="0" required />
 				</label>
 
-				<label>
-					<span>Ville</span>
-					<input type="text" formControlName="city" required />
-				</label>
+								<label>
+										<span>Ville</span>
+										<input type="text" formControlName="city" required />
+										<div class="error" *ngIf="form.get('city')?.invalid && (form.get('city')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 
-				<label>
-					<span>Code postal</span>
-					<input type="text" formControlName="postalCode" required />
-				</label>
+								<label>
+										<span>Code postal</span>
+										<input type="text" formControlName="postalCode" required />
+										<div class="error" *ngIf="form.get('postalCode')?.invalid && (form.get('postalCode')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 			</div>
 
 			<label>
@@ -108,6 +130,16 @@
 
 			<p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
 			<p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
+
+			<div *ngIf="submitted && form.invalid" style="color: red; margin-top: 1rem;">
+				<strong>Champs invalides détectés :</strong>
+				<ul>
+					<li *ngFor="let key of form.controls | keyvalue" style="font-size: 0.95em;"
+						[hidden]="form.get(key.key)?.valid">
+						{{ key.key }} : invalide
+					</li>
+				</ul>
+			</div>
 
 			<button type="submit">
 				{{ loading ? 'Création...' : "Créer l'annonce" }}
