@@ -8,9 +8,9 @@ export class BrandService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.API_URL}/api/brands`;
 
-  getBrands(): Observable<string[]> {
+  getBrands(): Observable<{ id: number; name: string }[]> {
     return this.http.get<any[]>(this.baseUrl).pipe(
-      map((brands) => (brands || []).map(b => b.name))
+      map((brands) => (brands || []).map(b => ({ id: b.id, name: b.name })))
     );
   }
 }

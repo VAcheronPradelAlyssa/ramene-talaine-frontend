@@ -35,7 +35,7 @@ export class CreateListing implements OnInit {
   };
 
 
-  brands: string[] = [];
+  brands: { id: number; name: string }[] = [];
   selectedBrand: string = '';
   newBrand: string = '';
   imageUrlsInput = '';
@@ -68,20 +68,26 @@ export class CreateListing implements OnInit {
     if (!form.valid || this.loading) {
       return;
     }
-    // Choisir la bonne valeur de marque
-    this.formData.brand = this.selectedBrand === 'Autre' ? this.newBrand : this.selectedBrand;
-
+    // Préparer le payload selon le choix de la marque
     this.loading = true;
     this.successMsg = '';
     this.errorMsg = '';
 
-    const payload: Partial<Listing> = {
+    let payload: any = {
       ...this.formData,
       imageUrls: this.imageUrlsInput
         .split(',')
         .map((url: string) => url.trim())
         .filter((url: string) => !!url),
     };
+
+    if (this.selectedBrand === 'Autre') {
+      delete payload.brand;
+      payload.customBrand = this.newBrand;
+    } else if (this.selectedBrand) {
+      payload.brandId = Number(this.selectedBrand);
+      delete payload.brand;
+    }
 
     if (this.formData.type === ListingType.SALE && this.formData.price != null) {
       payload.price = this.formData.price;

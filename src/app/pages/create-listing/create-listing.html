@@ -18,7 +18,7 @@
 					<span>Marque</span>
 					<select name="brand" [(ngModel)]="selectedBrand" required>
 						<option value="" disabled hidden>-- Sélectionner une marque --</option>
-						<option *ngFor="let brand of brands" [value]="brand">{{ brand }}</option>
+						<option *ngFor="let brand of brands" [value]="brand.id">{{ brand.name }}</option>
 						<option value="Autre">Autre</option>
 					</select>
 				</label>
