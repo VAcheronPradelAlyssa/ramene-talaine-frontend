@@ -40,10 +40,28 @@
 					</mat-form-field>
 				</div>
 
-				<label>
-					<span>Composition</span>
-					<input type="text" name="composition" [(ngModel)]="formData.composition" required />
-				</label>
+
+								<label>
+									<span>Composition</span>
+									<select name="composition" [(ngModel)]="formData.composition" required>
+										<option value="" disabled selected>Choisir une composition</option>
+										<option *ngFor="let comp of compositionsList" [value]="comp.id">{{ comp.name }}</option>
+										<option value="Autre">Autre</option>
+									</select>
+								</label>
+								<!-- DEBUG: Affichage temporaire des compositions récupérées -->
+								<div style="background:#ffe;border:1px solid #ccc;padding:8px;margin:8px 0;">
+									<strong>DEBUG compositionsList:</strong>
+									<pre>{{ compositionsList | json }}</pre>
+									<div *ngIf="compositionsError" style="color:red;">
+										<strong>Erreur chargement compositions :</strong>
+										<pre>{{ compositionsError | json }}</pre>
+									</div>
+								</div>
+								<label *ngIf="formData.composition === 'Autre'">
+									<span>Nouvelle composition</span>
+									<input type="text" name="compositionAutre" [(ngModel)]="compositionAutre" placeholder="Précisez la composition" required />
+								</label>
 
 				<label>
 					<span>Couleur</span>

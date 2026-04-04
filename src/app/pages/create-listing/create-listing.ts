@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule, NgForm, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { CompositionService } from '../../services/composition.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -26,6 +27,10 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './create-listing.scss',
 })
 export class CreateListing implements OnInit {
+  compositionAutre: string = '';
+  compositionsList: { id: number; name: string }[] = [];
+  compositionsError: any = null;
+  private readonly compositionService = inject(CompositionService);
   private readonly listingService = inject(ListingService);
   private readonly brandService = inject(BrandService);
   private readonly authService = inject(AuthService);
@@ -61,6 +66,21 @@ export class CreateListing implements OnInit {
   errorMsg = '';
 
   ngOnInit(): void {
+    // Récupération dynamique des compositions
+    this.compositionService.getCompositions().subscribe({
+      next: (data) => {
+        this.compositionsList = Array.isArray(data) ? data : [];
+        this.compositionsError = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.compositionsList = [];
+        this.compositionsError = err;
+        this.cdr.detectChanges();
+      }
+    });
+
+    // Récupération des marques (inchangé)
     this.brandService.getBrands().subscribe({
       next: (brands) => {
         this.brands = brands || [];
@@ -79,6 +99,9 @@ export class CreateListing implements OnInit {
       switchMap(value => this.searchBrands(value || ''))
     );
   }
+
+  // ... (toutes les autres méthodes du composant ici, inchangées)
+
 
   searchBrands(query: string): Observable<{ id: number; name: string }[]> {
     if (!query || query === 'Autre') {
@@ -116,8 +139,21 @@ export class CreateListing implements OnInit {
     this.successMsg = '';
     this.errorMsg = '';
 
+
+    // Gérer la valeur de composition
+
+    let compositionValue;
+    if (this.formData.composition === 'Autre') {
+      compositionValue = this.compositionAutre;
+    } else {
+      // Cherche l'objet complet dans la liste
+      const found = this.compositionsList.find(c => c.id === Number(this.formData.composition) || c.name === this.formData.composition);
+      compositionValue = found ? found : this.formData.composition;
+    }
+
     let payload: any = {
       ...this.formData,
+      composition: compositionValue,
       imageUrls: this.imageUrlsInput
         .split(',')
         .map((url: string) => url.trim())
