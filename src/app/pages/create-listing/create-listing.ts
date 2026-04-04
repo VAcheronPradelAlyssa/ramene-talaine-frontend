@@ -11,6 +11,7 @@ import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 import { BrandService } from '../../services/brand.service';
 import { AuthService } from '../../services/auth.service';
+import { ColorService, ColorOption } from '../../services/color.service';
 
 @Component({
   selector: 'app-create-listing',
@@ -32,7 +33,10 @@ export class CreateListing implements OnInit {
   compositionAutre: string = '';
   compositionsList: { id: number; name: string }[] = [];
   compositionsError: any = null;
+  colorsList: ColorOption[] = [];
+  colorsError: any = null;
   private readonly compositionService = inject(CompositionService);
+  private readonly colorService = inject(ColorService);
   private readonly listingService = inject(ListingService);
   private readonly brandService = inject(BrandService);
   private readonly authService = inject(AuthService);
@@ -109,6 +113,19 @@ export class CreateListing implements OnInit {
       error: (err) => {
         this.compositionsList = [];
         this.compositionsError = err;
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.colorService.getColors().subscribe({
+      next: (data) => {
+        this.colorsList = Array.isArray(data) ? data : [];
+        this.colorsError = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.colorsList = [];
+        this.colorsError = err;
         this.cdr.detectChanges();
       }
     });

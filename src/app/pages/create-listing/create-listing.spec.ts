@@ -7,6 +7,7 @@ import { ListingService } from '../../services/listing.service';
 import { BrandService } from '../../services/brand.service';
 import { CompositionService } from '../../services/composition.service';
 import { AuthService } from '../../services/auth.service';
+import { ColorService } from '../../services/color.service';
 import { ListingType } from '../../models/listing.model';
 
 describe('CreateListing', () => {
@@ -20,6 +21,10 @@ describe('CreateListing', () => {
 
   const compositionServiceMock = {
     getCompositions: () => of([{ id: 42, name: 'Coton' }]),
+  };
+
+  const colorServiceMock = {
+    getColors: () => of([{ id: 1, name: 'Turquoise' }]),
   };
 
   const authServiceMock = {
@@ -37,6 +42,7 @@ describe('CreateListing', () => {
         { provide: ListingService, useValue: listingServiceSpy },
         { provide: BrandService, useValue: brandServiceMock },
         { provide: CompositionService, useValue: compositionServiceMock },
+        { provide: ColorService, useValue: colorServiceMock },
         { provide: AuthService, useValue: authServiceMock },
       ],
     }).compileComponents();

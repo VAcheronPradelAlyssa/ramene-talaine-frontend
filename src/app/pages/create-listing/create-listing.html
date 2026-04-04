@@ -68,7 +68,10 @@
 
 								<label>
 										<span>Couleur</span>
-										<input type="text" formControlName="color" required />
+										<select formControlName="color" required>
+											<option value="" disabled>Choisir une couleur</option>
+											<option *ngFor="let color of colorsList" [value]="color.name">{{ color.name }}</option>
+										</select>
 										<div class="error" *ngIf="form.get('color')?.invalid && (form.get('color')?.touched || submitted)">
 											Ce champ est obligatoire.
 										</div>
