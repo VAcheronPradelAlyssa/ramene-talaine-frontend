@@ -1,3 +1,5 @@
+<pre *ngIf="listing" class="listing-debug">{{ listing | json }}</pre>
+
 <div class="listing-detail" *ngIf="!loading && listing; else loadingTpl">
 	<!-- Titre -->
 	<section class="section-title" *ngIf="listing.title">
@@ -14,6 +16,12 @@
 	<section class="section-price" *ngIf="listing.price != null">
 		<h3>Prix</h3>
 		<p>{{ listing.price }} €</p>
+	</section>
+
+	<!-- Couleur -->
+	<section class="section-color" *ngIf="getColorLabels(listing).length">
+		<h3>Couleur</h3>
+		<p>{{ getColorLabels(listing).join(', ') }}</p>
 	</section>
 
 	<!-- Localisation -->

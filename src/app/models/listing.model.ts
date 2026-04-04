@@ -7,6 +7,13 @@ export enum ListingType {
 import type { User } from './user.model';
 
 export type BrandRef = string | { id: number; name: string };
+export type ColorRef = string | { id?: number | string; name?: string };
+
+export interface ListingColorSelection {
+  colorId?: number | string;
+  colorName?: string;
+  customColor?: string;
+}
 
 export interface Listing {
   id?: string;
@@ -18,6 +25,7 @@ export interface Listing {
   composition: string;
   compositions?: any[];
   color: string;
+  colors?: ListingColorSelection[];
   weight: string;
   length: string;
   type: ListingType;

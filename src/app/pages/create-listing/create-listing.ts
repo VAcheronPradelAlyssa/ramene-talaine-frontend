@@ -65,6 +65,7 @@ export class CreateListing implements OnInit {
   selectedBrand: string = '';
   newBrand: string = '';
   filteredBrands$: Observable<{ id: number; name: string }[]> = of([]);
+  filteredColors$: Observable<ColorOption[]>[] = [];
   showOtherOption = true;
   imageUrlsInput = '';
   loading = false;
@@ -197,28 +198,50 @@ export class CreateListing implements OnInit {
 
   private createColorGroup(): FormGroup {
     return this.fb.group({
-      colorId: ['', Validators.required],
+      colorQuery: ['', Validators.required],
       customColor: ['']
     });
   }
 
   addColor(): void {
     this.colors.push(this.createColorGroup());
+    this.registerColorStream(this.colors.length - 1);
   }
 
   removeColor(index: number): void {
     this.colors.removeAt(index);
+    this.filteredColors$.splice(index, 1);
     if (this.colors.length === 0) {
       this.addColor();
     }
   }
 
+  private registerColorStream(index: number): void {
+    const colorControl = (this.colors.at(index) as FormGroup).get('colorQuery');
+    this.filteredColors$[index] = (colorControl?.valueChanges ?? of('')).pipe(
+      startWith(colorControl?.value ?? ''),
+      debounceTime(200),
+      map((value) => this.filterColors(typeof value === 'string' ? value : ''))
+    );
+  }
+
+  private filterColors(query: string): ColorOption[] {
+    const normalizedQuery = query.trim().toLowerCase();
+    const matches = this.colorsList.filter((color) => color.name.toLowerCase().includes(normalizedQuery));
+
+    if (this.otherColorOption.toLowerCase().includes(normalizedQuery) || normalizedQuery === '') {
+      return [...matches, { id: this.otherColorOption, name: this.otherColorOption }];
+    }
+
+    return matches;
+  }
+
   onColorSelectionChange(index: number): void {
     const colorGroup = this.colors.at(index) as FormGroup;
-    const colorId = colorGroup.get('colorId')?.value;
+    const colorQuery = String(colorGroup.get('colorQuery')?.value ?? '').trim();
     const customColorControl = colorGroup.get('customColor');
 
-    if (colorId === this.otherColorOption) {
+    if (colorQuery === this.otherColorOption) {
       customColorControl?.setValidators([Validators.required]);
     } else {
       customColorControl?.clearValidators();
@@ -226,6 +249,10 @@ export class CreateListing implements OnInit {
     }
 
     customColorControl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  onColorBlur(index: number): void {
+    this.onColorSelectionChange(index);
   }
 
   private normalizeColorId(value: unknown): number | string {
@@ -326,20 +353,39 @@ export class CreateListing implements OnInit {
 
     const colorsPayload = (formValue.colors || [])
       .map((c: any) => {
-        const colorIdValue = String(c.colorId ?? '').trim();
+        const colorQueryValue = String(c.colorQuery ?? '').trim();
         const customColorValue = String(c.customColor ?? '').trim();
 
-        if (!colorIdValue) {
+        if (!colorQueryValue) {
           return null;
         }
 
-        if (colorIdValue === this.otherColorOption) {
+        if (colorQueryValue === this.otherColorOption) {
           return customColorValue ? { customColor: customColorValue } : null;
         }
 
-        return { colorId: this.normalizeColorId(colorIdValue) };
+        const exactMatch = this.colorsList.find((color) => color.name.toLowerCase() === colorQueryValue.toLowerCase());
+        return exactMatch ? { colorId: this.normalizeColorId(exactMatch.id) } : null;
       })
       .filter((c: any) => c !== null);
+
+    const colorLabels = (formValue.colors || [])
+      .map((c: any) => {
+        const colorQueryValue = String(c.colorQuery ?? '').trim();
+        const customColorValue = String(c.customColor ?? '').trim();
+
+        if (!colorQueryValue) {
+          return null;
+        }
+
+        if (colorQueryValue === this.otherColorOption) {
+          return customColorValue || null;
+        }
+
+        const exactMatch = this.colorsList.find((color) => color.name.toLowerCase() === colorQueryValue.toLowerCase());
+        return exactMatch?.name ?? colorQueryValue;
+      })
+      .filter((value: string | null) => value !== null);
 
     if (colorsPayload.length === 0) {
       this.loading = false;
@@ -352,6 +398,7 @@ export class CreateListing implements OnInit {
       title: formValue.title,
       description: formValue.description,
       brandId: null,
+      color: colorLabels.join(', '),
       colors: colorsPayload,
       weight: Number(formValue.weightValue),
       weightUnit: 'g',
@@ -385,15 +432,6 @@ export class CreateListing implements OnInit {
     // Ne jamais envoyer les champs de formulaire bruts.
     delete payload.brand;
     delete payload.newBrand;
-    delete payload.color;
-
-    // Compatibilité éventuelle avec un backend ancien qui lit encore "color".
-    const firstColor = colorsPayload[0];
-    if (firstColor?.customColor) {
-      payload.color = firstColor.customColor;
-    } else if (firstColor?.colorId != null) {
-      payload.color = this.resolveColorLabelById(firstColor.colorId);
-    }
 
     // Ne pas envoyer length si vide
     if (payload.length === undefined || payload.length === null || payload.length === '') {
@@ -414,16 +452,6 @@ export class CreateListing implements OnInit {
     if (!payload.colors || !Array.isArray(payload.colors) || payload.colors.length === 0) {
       delete payload.colors;
     }
-    // Affichage debug détaillé
-    console.log('Payload envoyé à l\'API:', payload);
-    console.log('[DEBUG] Champs marque envoyés:', {
-      brandId: payload.brandId,
-      customBrand: payload.customBrand,
-      formBrand: brandValue,
-      formNewBrand: newBrandValue,
-      isOtherBrand
-    });
-
     // Nettoyage des champs optionnels pour éviter d'envoyer null
     if (payload.customBrand == null || payload.customBrand === '') {
       delete payload.customBrand;

@@ -1,7 +1,7 @@
 import { CompositionService } from '../../services/composition.service';
 // Correction : une seule déclaration/export de la classe ListingDetail
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ListingService } from '../../services/listing.service';
 import { Listing, ListingType } from '../../models/listing.model';
@@ -10,7 +10,7 @@ import { NgIf } from '@angular/common';
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, NgIf],
+  imports: [CommonModule, NgIf, JsonPipe],
   templateUrl: './listing-detail.html',
   styleUrl: './listing-detail.scss',
 })
@@ -41,6 +41,7 @@ export class ListingDetail implements OnInit {
         this.cdr.detectChanges();
       }
     });
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (!id) {
@@ -86,5 +87,31 @@ export class ListingDetail implements OnInit {
     }
 
     return null;
+  }
+
+  getColorLabels(listing: Listing): string[] {
+    const labels: string[] = [];
+
+    if (Array.isArray(listing.colors)) {
+      for (const color of listing.colors) {
+        const colorName = String(color?.colorName ?? '').trim();
+        const customColor = String(color?.customColor ?? '').trim();
+
+        if (colorName) {
+          labels.push(colorName);
+          continue;
+        }
+
+        if (customColor) {
+          labels.push(customColor);
+        }
+      }
+    }
+
+    if (labels.length === 0 && typeof listing.color === 'string' && listing.color.trim() !== '') {
+      labels.push(listing.color.trim());
+    }
+
+    return [...new Set(labels)];
   }
 }

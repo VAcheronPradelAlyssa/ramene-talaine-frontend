@@ -70,13 +70,19 @@
 									<div *ngFor="let colorCtrl of colors.controls; let i = index" [formGroupName]="i" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
 										<label>
 											<span>Couleur</span>
-											<select formControlName="colorId" (change)="onColorSelectionChange(i)" required>
-												<option value="" disabled>Choisir une couleur</option>
-												<option *ngFor="let color of colorsList" [value]="color.id">{{ color.name }}</option>
-												<option [value]="otherColorOption">Autre</option>
-											</select>
+											<input
+												type="text"
+												matInput
+												formControlName="colorQuery"
+												[matAutocomplete]="colorAuto"
+												placeholder="Choisir une couleur"
+												(blur)="onColorBlur(i)"
+											/>
+											<mat-autocomplete #colorAuto="matAutocomplete" (optionSelected)="onColorSelectionChange(i)">
+												<mat-option *ngFor="let color of filteredColors$[i] | async" [value]="color.name">{{ color.name }}</mat-option>
+											</mat-autocomplete>
 										</label>
-										<label *ngIf="colorCtrl.get('colorId')?.value === otherColorOption">
+										<label *ngIf="colorCtrl.get('colorQuery')?.value === otherColorOption">
 											<span>Couleur personnalisée</span>
 											<input type="text" formControlName="customColor" placeholder="Saisissez une couleur" required />
 										</label>

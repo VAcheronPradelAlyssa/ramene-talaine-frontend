@@ -81,7 +81,7 @@ describe('CreateListing', () => {
     const firstColor = component.colors.at(0);
 
     firstColor.patchValue({
-      colorId: 1,
+      colorQuery: 'Turquoise',
       customColor: '',
     });
 
@@ -98,6 +98,7 @@ describe('CreateListing', () => {
     expect(payload.customBrand).toBe('Marque Perso');
     expect(payload.brand).toBeUndefined();
     expect(payload.newBrand).toBeUndefined();
+    expect(payload.color).toBe('Turquoise');
     expect(payload.colors).toEqual([{ colorId: 1 }]);
   });
 });
