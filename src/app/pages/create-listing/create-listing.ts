@@ -29,6 +29,7 @@ import { ColorService, ColorOption } from '../../services/color.service';
 })
 export class CreateListing implements OnInit {
     submitted = false;
+  readonly otherColorOption = 'Autre';
   form: FormGroup;
   compositionAutre: string = '';
   compositionsList: { id: number; name: string }[] = [];
@@ -76,7 +77,7 @@ export class CreateListing implements OnInit {
       description: ['', Validators.required],
       brand: ['', this.brandValidator.bind(this)],
       newBrand: [''],
-      color: ['', Validators.required],
+      colors: this.fb.array([], Validators.minLength(1)),
       weightValue: [null, [Validators.required, Validators.pattern('^[0-9]+$'), Validators.min(1)]],
       length: [null, [Validators.required, Validators.pattern('^[0-9]+([.][0-9]+)?$'), Validators.min(0)]],
       type: [ListingType.SALE, Validators.required],
@@ -179,10 +180,67 @@ export class CreateListing implements OnInit {
     if (this.compositions.length === 0) {
       this.addComposition();
     }
+
+    // Ajoute une couleur par défaut
+    if (this.colors.length === 0) {
+      this.addColor();
+    }
   }
 
   get compositions(): FormArray {
     return this.form.get('compositions') as FormArray;
+  }
+
+  get colors(): FormArray {
+    return this.form.get('colors') as FormArray;
+  }
+
+  private createColorGroup(): FormGroup {
+    return this.fb.group({
+      colorId: ['', Validators.required],
+      customColor: ['']
+    });
+  }
+
+  addColor(): void {
+    this.colors.push(this.createColorGroup());
+  }
+
+  removeColor(index: number): void {
+    this.colors.removeAt(index);
+    if (this.colors.length === 0) {
+      this.addColor();
+    }
+  }
+
+  onColorSelectionChange(index: number): void {
+    const colorGroup = this.colors.at(index) as FormGroup;
+    const colorId = colorGroup.get('colorId')?.value;
+    const customColorControl = colorGroup.get('customColor');
+
+    if (colorId === this.otherColorOption) {
+      customColorControl?.setValidators([Validators.required]);
+    } else {
+      customColorControl?.clearValidators();
+      customColorControl?.setValue('');
+    }
+
+    customColorControl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private normalizeColorId(value: unknown): number | string {
+    const normalized = String(value ?? '').trim();
+    const asNumber = Number(normalized);
+    return Number.isNaN(asNumber) ? normalized : asNumber;
+  }
+
+  private resolveColorLabelById(colorId: number | string | undefined): string | undefined {
+    if (colorId == null) {
+      return undefined;
+    }
+
+    const found = this.colorsList.find((c) => String(c.id) === String(colorId));
+    return found?.name;
   }
 
   addComposition(): void {
@@ -266,12 +324,35 @@ export class CreateListing implements OnInit {
       }
     });
 
+    const colorsPayload = (formValue.colors || [])
+      .map((c: any) => {
+        const colorIdValue = String(c.colorId ?? '').trim();
+        const customColorValue = String(c.customColor ?? '').trim();
+
+        if (!colorIdValue) {
+          return null;
+        }
+
+        if (colorIdValue === this.otherColorOption) {
+          return customColorValue ? { customColor: customColorValue } : null;
+        }
+
+        return { colorId: this.normalizeColorId(colorIdValue) };
+      })
+      .filter((c: any) => c !== null);
+
+    if (colorsPayload.length === 0) {
+      this.loading = false;
+      this.errorMsg = 'Veuillez ajouter au moins une couleur valide.';
+      return;
+    }
+
     // Construction stricte du payload selon le format attendu
     let payload: any = {
       title: formValue.title,
       description: formValue.description,
       brandId: null,
-      color: formValue.color,
+      colors: colorsPayload,
       weight: Number(formValue.weightValue),
       weightUnit: 'g',
       length: formValue.length ? Number(formValue.length) : undefined,
@@ -304,6 +385,15 @@ export class CreateListing implements OnInit {
     // Ne jamais envoyer les champs de formulaire bruts.
     delete payload.brand;
     delete payload.newBrand;
+    delete payload.color;
+
+    // Compatibilité éventuelle avec un backend ancien qui lit encore "color".
+    const firstColor = colorsPayload[0];
+    if (firstColor?.customColor) {
+      payload.color = firstColor.customColor;
+    } else if (firstColor?.colorId != null) {
+      payload.color = this.resolveColorLabelById(firstColor.colorId);
+    }
 
     // Ne pas envoyer length si vide
     if (payload.length === undefined || payload.length === null || payload.length === '') {
@@ -320,6 +410,9 @@ export class CreateListing implements OnInit {
     // Ne pas envoyer compositions si vide
     if (!payload.compositions || !Array.isArray(payload.compositions) || payload.compositions.length === 0) {
       delete payload.compositions;
+    }
+    if (!payload.colors || !Array.isArray(payload.colors) || payload.colors.length === 0) {
+      delete payload.colors;
     }
     // Affichage debug détaillé
     console.log('Payload envoyé à l\'API:', payload);
@@ -361,7 +454,11 @@ export class CreateListing implements OnInit {
         while (this.compositions.length > 0) {
           this.compositions.removeAt(0);
         }
+        while (this.colors.length > 0) {
+          this.colors.removeAt(0);
+        }
         this.addComposition();
+        this.addColor();
         this.selectedBrand = '';
         this.newBrand = '';
         this.cdr.detectChanges();

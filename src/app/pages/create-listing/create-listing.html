@@ -66,16 +66,27 @@
 									<button type="button" (click)="addComposition()">Ajouter une composition</button>
 								</div>
 
-								<label>
-										<span>Couleur</span>
-										<select formControlName="color" required>
-											<option value="" disabled>Choisir une couleur</option>
-											<option *ngFor="let color of colorsList" [value]="color.name">{{ color.name }}</option>
-										</select>
-										<div class="error" *ngIf="form.get('color')?.invalid && (form.get('color')?.touched || submitted)">
-											Ce champ est obligatoire.
-										</div>
-								</label>
+								<div formArrayName="colors">
+									<div *ngFor="let colorCtrl of colors.controls; let i = index" [formGroupName]="i" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+										<label>
+											<span>Couleur</span>
+											<select formControlName="colorId" (change)="onColorSelectionChange(i)" required>
+												<option value="" disabled>Choisir une couleur</option>
+												<option *ngFor="let color of colorsList" [value]="color.id">{{ color.name }}</option>
+												<option [value]="otherColorOption">Autre</option>
+											</select>
+										</label>
+										<label *ngIf="colorCtrl.get('colorId')?.value === otherColorOption">
+											<span>Couleur personnalisée</span>
+											<input type="text" formControlName="customColor" placeholder="Saisissez une couleur" required />
+										</label>
+										<button type="button" (click)="removeColor(i)" *ngIf="colors.length > 1">Supprimer</button>
+									</div>
+									<button type="button" (click)="addColor()">Ajouter une couleur</button>
+									<div class="error" *ngIf="form.get('colors')?.invalid && (form.get('colors')?.touched || submitted)">
+										Veuillez sélectionner au moins une couleur valide.
+									</div>
+								</div>
 
 
 								<label>

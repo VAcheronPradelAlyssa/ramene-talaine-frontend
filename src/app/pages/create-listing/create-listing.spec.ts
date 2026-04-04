@@ -58,6 +58,8 @@ describe('CreateListing', () => {
   });
 
   it('should send brandId null and customBrand when brand is Autre', () => {
+    component.colors.clear();
+    component.addColor();
     component.compositions.clear();
     component.addComposition();
 
@@ -66,7 +68,6 @@ describe('CreateListing', () => {
       description: 'Description',
       brand: 'Autre',
       newBrand: 'Marque Perso',
-      color: 'Bleu',
       weightValue: 500,
       length: '120',
       type: ListingType.SALE,
@@ -77,6 +78,13 @@ describe('CreateListing', () => {
     });
 
     const firstComposition = component.compositions.at(0);
+    const firstColor = component.colors.at(0);
+
+    firstColor.patchValue({
+      colorId: 1,
+      customColor: '',
+    });
+
     firstComposition.patchValue({
       compositionId: 42,
       percentage: 80,
@@ -90,5 +98,6 @@ describe('CreateListing', () => {
     expect(payload.customBrand).toBe('Marque Perso');
     expect(payload.brand).toBeUndefined();
     expect(payload.newBrand).toBeUndefined();
+    expect(payload.colors).toEqual([{ colorId: 1 }]);
   });
 });
