@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Listing } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -7,7 +8,7 @@ import { ListingService } from '../../services/listing.service';
   standalone: true,
   templateUrl: './my-listings.html',
   styleUrls: ['./my-listings.scss'],
-  imports: [],
+  imports: [CommonModule],
 })
 export class MyListings implements OnInit {
   listings: Listing[] = [];

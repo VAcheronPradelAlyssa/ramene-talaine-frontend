@@ -1,7 +1,7 @@
 import { CompositionService } from '../../services/composition.service';
 // Correction : une seule déclaration/export de la classe ListingDetail
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ListingService } from '../../services/listing.service';
 import { Listing, ListingType } from '../../models/listing.model';
@@ -10,7 +10,7 @@ import { NgIf } from '@angular/common';
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, JsonPipe],
+  imports: [CommonModule, NgIf],
   templateUrl: './listing-detail.html',
   styleUrl: './listing-detail.scss',
 })

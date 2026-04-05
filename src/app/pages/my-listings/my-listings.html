@@ -1,13 +1,13 @@
 <section class="my-listings">
   <h2>Mes annonces</h2>
   <ng-container *ngIf="!loading; else loadingTpl">
-    <div *ngIf="listings?.length; else emptyTpl">
+    <div *ngIf="listings.length; else emptyTpl">
       <ul>
         <li *ngFor="let listing of listings">
           <h3>{{ listing.title }}</h3>
           <p>{{ listing.description }}</p>
           <p><strong>Prix :</strong> {{ listing.price }} €</p>
-          <button (click)="delete(listing.id)" type="button" class="delete-btn">Supprimer</button>
+          <button *ngIf="listing.id as id" (click)="delete(id)" type="button" class="delete-btn">Supprimer</button>
         </li>
       </ul>
     </div>
