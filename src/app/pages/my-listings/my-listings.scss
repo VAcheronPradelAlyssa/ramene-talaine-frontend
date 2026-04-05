@@ -75,19 +75,38 @@
   color: #6d5b4e;
 }
 
-.delete-btn {
+.action-buttons {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.edit-btn,
+.delete-btn {
   border: 0;
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 700;
   color: #fff;
-  background: rgba(163, 50, 47, 0.95);
   cursor: pointer;
   transition: background 0.2s ease;
+  text-align: center;
+  text-decoration: none;
+}
+
+.edit-btn {
+  background: rgba(64, 117, 76, 0.95);
+}
+
+.edit-btn:hover {
+  background: #35633f;
+}
+
+.delete-btn {
+  background: rgba(163, 50, 47, 0.95);
 }
 
 .delete-btn:hover:not(:disabled) {

@@ -18,6 +18,7 @@ export const routes: Routes = [
   { path: 'listings', component: Listings, canActivate: [authGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'create-listing', component: CreateListing, canActivate: [authGuard] },
+  { path: 'edit-listing/:id', component: CreateListing, canActivate: [authGuard] },
   { path: 'annonces/:id', component: ListingDetail },
   { path: 'mes-annonces', component: MyListings, canActivate: [authGuard] },
 ];

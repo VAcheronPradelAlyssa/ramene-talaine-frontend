@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { CompositionService } from '../../services/composition.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -28,7 +29,14 @@ import { ColorService, ColorOption } from '../../services/color.service';
   styleUrl: './create-listing.scss',
 })
 export class CreateListing implements OnInit {
-    submitted = false;
+  submitted = false;
+  isEditMode = false;
+  editListingId: string | null = null;
+  loadingListing = false;
+  private listingToEdit: Listing | null = null;
+  debugMode = true;
+  debugLoadedListing = '';
+  debugFormColors = '';
   readonly otherColorOption = 'Autre';
   form: FormGroup;
   compositionAutre: string = '';
@@ -39,6 +47,7 @@ export class CreateListing implements OnInit {
   private readonly compositionService = inject(CompositionService);
   private readonly colorService = inject(ColorService);
   private readonly listingService = inject(ListingService);
+  private readonly route = inject(ActivatedRoute);
   private readonly brandService = inject(BrandService);
   private readonly authService = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -105,6 +114,8 @@ export class CreateListing implements OnInit {
   }
 
   ngOnInit(): void {
+    this.initEditMode();
+
     // Récupération dynamique des compositions
     this.compositionService.getCompositions().subscribe({
       next: (data) => {
@@ -123,6 +134,7 @@ export class CreateListing implements OnInit {
       next: (data) => {
         this.colorsList = Array.isArray(data) ? data : [];
         this.colorsError = null;
+        this.patchMissingColorLabels();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -136,7 +148,9 @@ export class CreateListing implements OnInit {
     this.brandService.getBrands().subscribe({
       next: (brands) => {
         this.brands = brands || [];
-        this.selectedBrand = '';
+        if (!this.isEditMode) {
+          this.selectedBrand = '';
+        }
         this.cdr.detectChanges();
       },
       error: () => {
@@ -472,31 +486,314 @@ export class CreateListing implements OnInit {
       payload.sellerId = user.id;
     }
 
-    this.listingService.createListing(payload).subscribe({
+    const request$ = this.isEditMode && this.editListingId
+      ? this.listingService.updateListing(this.editListingId, payload)
+      : this.listingService.createListing(payload);
+
+    request$.subscribe({
       next: () => {
-        this.successMsg = 'Annonce creee avec succes.';
+        this.successMsg = this.isEditMode
+          ? 'Annonce modifiee avec succes.'
+          : 'Annonce creee avec succes.';
         this.loading = false;
-        this.form.reset({ type: ListingType.SALE });
-        this.submitted = false;
-        // Réinitialise le FormArray
-        while (this.compositions.length > 0) {
-          this.compositions.removeAt(0);
+        if (!this.isEditMode) {
+          this.form.reset({ type: ListingType.SALE });
+          this.submitted = false;
+          while (this.compositions.length > 0) {
+            this.compositions.removeAt(0);
+          }
+          while (this.colors.length > 0) {
+            this.colors.removeAt(0);
+          }
+          this.addComposition();
+          this.addColor();
+          this.selectedBrand = '';
+          this.newBrand = '';
         }
-        while (this.colors.length > 0) {
-          this.colors.removeAt(0);
-        }
-        this.addComposition();
-        this.addColor();
-        this.selectedBrand = '';
-        this.newBrand = '';
         this.cdr.detectChanges();
       },
       error: (error: any) => {
-        this.errorMsg = error?.error?.message || 'Erreur lors de la creation de l\'annonce.';
+        this.errorMsg = error?.error?.message || 'Erreur lors de l\'enregistrement de l\'annonce.';
         this.loading = false;
         // Ne pas reset submitted ici pour garder l'affichage des erreurs
         this.cdr.detectChanges();
       },
     });
+  }
+
+  private initEditMode(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    this.isEditMode = true;
+    this.editListingId = id;
+    this.loadingListing = true;
+
+    this.listingService.getListingById(id).subscribe({
+      next: (listing) => {
+        this.listingToEdit = listing;
+        this.debugLoadedListing = JSON.stringify(listing, null, 2);
+        this.populateFormForEdit(listing);
+
+        if (!this.hasColorData(listing)) {
+          this.hydrateMissingColorsFromLists(id);
+        }
+
+        this.loadingListing = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.loadingListing = false;
+        this.errorMsg = error?.error?.message || 'Impossible de charger l\'annonce a modifier.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private populateFormForEdit(listing: Listing): void {
+    const brandName = typeof listing.brand === 'string'
+      ? listing.brand
+      : String(listing.brand?.name ?? '').trim();
+    const hasCustomBrand = !!String(listing.customBrand ?? '').trim();
+
+    this.form.patchValue({
+      title: listing.title ?? '',
+      description: listing.description ?? '',
+      brand: hasCustomBrand ? 'Autre' : brandName,
+      newBrand: listing.customBrand ?? '',
+      weightValue: listing.weight ? Number(listing.weight) : null,
+      length: listing.length ? Number(listing.length) : null,
+      type: listing.type ?? ListingType.SALE,
+      price: listing.price ?? null,
+      city: listing.city ?? '',
+      postalCode: listing.postalCode ?? '',
+      imageUrls: Array.isArray(listing.imageUrls) ? listing.imageUrls.join(', ') : '',
+    });
+
+    this.selectedBrand = hasCustomBrand ? 'Autre' : '';
+    this.showOtherOption = this.selectedBrand !== 'Autre';
+
+    while (this.compositions.length > 0) {
+      this.compositions.removeAt(0);
+    }
+
+    const listingCompositions = Array.isArray(listing.compositions) ? listing.compositions : [];
+    if (listingCompositions.length === 0) {
+      this.addComposition();
+    } else {
+      for (const composition of listingCompositions) {
+        const compositionId = (composition as any)?.compositionId
+          ?? (composition as any)?.id
+          ?? (composition as any)?.composition?.id
+          ?? '';
+        const percentage = (composition as any)?.percentage ?? '';
+        this.compositions.push(
+          this.fb.group({
+            compositionId: [String(compositionId)],
+            customComposition: [''],
+            percentage: [percentage],
+          })
+        );
+      }
+    }
+
+    while (this.colors.length > 0) {
+      this.colors.removeAt(0);
+    }
+    this.filteredColors$ = [];
+
+    const listingColors = Array.isArray(listing.colors) ? listing.colors : [];
+    const fallbackColorLabels = this.extractFallbackColorLabels(listing);
+
+    if (listingColors.length > 0) {
+      listingColors.forEach((color, index) => {
+        this.addColor();
+        const colorData = color as any;
+        const primitiveColorValue =
+          typeof colorData === 'string' || typeof colorData === 'number'
+            ? String(colorData).trim()
+            : '';
+        const colorId = colorData?.colorId ?? colorData?.id ?? colorData?.color?.id;
+        const explicitColorName = String(
+          colorData?.colorName ?? colorData?.name ?? colorData?.label ?? colorData?.color?.name ?? colorData?.color?.label ?? ''
+        ).trim();
+        const customColor = String(colorData?.customColor ?? colorData?.color?.customColor ?? '').trim();
+        const fallbackLabel = fallbackColorLabels[index] ?? '';
+
+        const primitiveAsId = /^\d+$/.test(primitiveColorValue) ? Number(primitiveColorValue) : primitiveColorValue;
+
+        const colorLabel = customColor
+          ? this.otherColorOption
+          : explicitColorName
+            || this.resolveColorLabelById(colorId)
+            || this.resolveColorLabelById(primitiveAsId as number | string)
+            || (primitiveColorValue && !/^\d+$/.test(primitiveColorValue) ? primitiveColorValue : '')
+            || fallbackLabel
+            || String(colorId ?? '').trim();
+        const colorGroup = this.colors.at(index) as FormGroup;
+        colorGroup.patchValue({
+          colorQuery: colorLabel,
+          customColor,
+        });
+        this.onColorSelectionChange(index);
+      });
+    } else {
+      if (fallbackColorLabels.length > 0) {
+        fallbackColorLabels.forEach((fallbackColor) => {
+          this.addColor();
+          const index = this.colors.length - 1;
+          const colorGroup = this.colors.at(index) as FormGroup;
+          colorGroup.patchValue({ colorQuery: fallbackColor, customColor: '' });
+        });
+      } else {
+        this.addColor();
+      }
+    }
+
+    this.onTypeChange();
+    this.refreshDebugFormColors();
+  }
+
+  private patchMissingColorLabels(): void {
+    if (!this.isEditMode || !this.listingToEdit || this.colors.length === 0 || this.colorsList.length === 0) {
+      return;
+    }
+
+    const listingColors = Array.isArray(this.listingToEdit.colors) ? this.listingToEdit.colors : [];
+    for (let index = 0; index < this.colors.length; index += 1) {
+      const colorGroup = this.colors.at(index) as FormGroup;
+      const currentValue = String(colorGroup.get('colorQuery')?.value ?? '').trim();
+      if (currentValue !== '') {
+        continue;
+      }
+
+      const colorData = listingColors[index] as any;
+      const primitiveColorValue =
+        typeof colorData === 'string' || typeof colorData === 'number'
+          ? String(colorData).trim()
+          : '';
+      const colorId = colorData?.colorId ?? colorData?.id ?? colorData?.color?.id;
+      const primitiveAsId = /^\d+$/.test(primitiveColorValue) ? Number(primitiveColorValue) : primitiveColorValue;
+      const resolved = this.resolveColorLabelById(colorId)
+        || this.resolveColorLabelById(primitiveAsId as number | string)
+        || (primitiveColorValue && !/^\d+$/.test(primitiveColorValue) ? primitiveColorValue : '');
+      if (resolved) {
+        colorGroup.patchValue({ colorQuery: resolved });
+      }
+    }
+
+    this.refreshDebugFormColors();
+  }
+
+  private extractFallbackColorLabels(listing: Listing): string[] {
+    const raw = (listing as any)?.color;
+
+    if (Array.isArray(raw)) {
+      return raw
+        .map((item) => String((item as any)?.name ?? (item as any)?.label ?? item ?? '').trim())
+        .filter((value) => value !== '');
+    }
+
+    if (typeof raw === 'string') {
+      return raw
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value !== '');
+    }
+
+    if (raw && typeof raw === 'object') {
+      const single = String((raw as any)?.name ?? (raw as any)?.label ?? '').trim();
+      return single ? [single] : [];
+    }
+
+    return [];
+  }
+
+  private hasColorData(listing: Listing): boolean {
+    if (Array.isArray(listing.colors) && listing.colors.length > 0) {
+      return true;
+    }
+
+    const rawColor = (listing as any)?.color;
+
+    if (typeof rawColor === 'string') {
+      return rawColor.trim() !== '';
+    }
+
+    if (Array.isArray(rawColor)) {
+      return rawColor.length > 0;
+    }
+
+    if (rawColor && typeof rawColor === 'object') {
+      const label = String((rawColor as any)?.name ?? (rawColor as any)?.label ?? '').trim();
+      return label !== '';
+    }
+
+    return false;
+  }
+
+  private hydrateMissingColorsFromLists(id: string): void {
+    this.listingService.getMyListings().subscribe({
+      next: (myListings) => {
+        const fromMine = myListings.find((item) => String(item.id) === String(id));
+
+        if (fromMine && this.hasColorData(fromMine)) {
+          this.applyFallbackColors(fromMine);
+          return;
+        }
+
+        this.listingService.getAllListings().subscribe({
+          next: (allListings) => {
+            const fromAll = allListings.find((item) => String(item.id) === String(id));
+            if (fromAll && this.hasColorData(fromAll)) {
+              this.applyFallbackColors(fromAll);
+            }
+          },
+          error: () => {
+            // Non bloquant
+          },
+        });
+      },
+      error: () => {
+        this.listingService.getAllListings().subscribe({
+          next: (allListings) => {
+            const fromAll = allListings.find((item) => String(item.id) === String(id));
+            if (fromAll && this.hasColorData(fromAll)) {
+              this.applyFallbackColors(fromAll);
+            }
+          },
+          error: () => {
+            // Non bloquant
+          },
+        });
+      },
+    });
+  }
+
+  private applyFallbackColors(source: Listing): void {
+    if (!this.listingToEdit) {
+      return;
+    }
+
+    this.listingToEdit = {
+      ...this.listingToEdit,
+      colors: source.colors ?? this.listingToEdit.colors,
+      color: ((source as any).color ?? (this.listingToEdit as any).color) as any,
+    };
+
+    this.debugLoadedListing = JSON.stringify(this.listingToEdit, null, 2);
+    this.populateFormForEdit(this.listingToEdit);
+    this.cdr.detectChanges();
+  }
+
+  private refreshDebugFormColors(): void {
+    const value = this.colors.controls.map((control, index) => ({
+      index,
+      colorQuery: String(control.get('colorQuery')?.value ?? ''),
+      customColor: String(control.get('customColor')?.value ?? ''),
+    }));
+    this.debugFormColors = JSON.stringify(value, null, 2);
   }
 }

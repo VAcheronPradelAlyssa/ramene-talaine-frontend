@@ -26,15 +26,17 @@
         </div>
       </a>
 
-      <button
-        *ngIf="listing.id as id"
-        (click)="delete(id, listing.title)"
-        type="button"
-        class="delete-btn"
-        [disabled]="deleting === id"
-      >
-        {{ deleting === id ? 'Suppression...' : 'Supprimer' }}
-      </button>
+      <div class="action-buttons" *ngIf="listing.id as id">
+        <a [routerLink]="['/edit-listing', id]" class="edit-btn">Modifier</a>
+        <button
+          (click)="delete(id, listing.title)"
+          type="button"
+          class="delete-btn"
+          [disabled]="deleting === id"
+        >
+          {{ deleting === id ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </div>
     </article>
 
     <p class="state empty" *ngIf="listings.length === 0">Aucune annonce trouvee.</p>

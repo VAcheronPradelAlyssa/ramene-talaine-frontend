@@ -48,6 +48,10 @@ export class ListingService {
     return this.http.get<Listing>(`${this.baseUrl}/${id}`);
   }
 
+  updateListing(id: string, listing: Partial<Listing>): Observable<Listing> {
+    return this.http.put<Listing>(`${this.baseUrl}/${id}`, listing);
+  }
+
   deleteListing(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

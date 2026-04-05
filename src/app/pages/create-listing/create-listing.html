@@ -1,6 +1,14 @@
 <section class="listing-shell">
 	<div class="listing-card">
-		<h1>Creer une annonce</h1>
+		<h1>{{ isEditMode ? 'Modifier une annonce' : 'Creer une annonce' }}</h1>
+		<p class="feedback" *ngIf="isEditMode">Mode edition : les champs existants sont pre-remplis.</p>
+		<p class="feedback" *ngIf="loadingListing">Chargement de l'annonce...</p>
+		<div *ngIf="isEditMode && debugMode" class="debug-block">
+			<strong>DEBUG listing charge :</strong>
+			<pre>{{ debugLoadedListing }}</pre>
+			<strong>DEBUG couleurs du formulaire :</strong>
+			<pre>{{ debugFormColors }}</pre>
+		</div>
 
 		<form [formGroup]="form" (ngSubmit)="onSubmit()" class="listing-form" novalidate>
 						<label>
@@ -161,8 +169,8 @@
 				</ul>
 			</div>
 
-			<button type="submit">
-				{{ loading ? 'Création...' : "Créer l'annonce" }}
+			<button type="submit" [disabled]="loading || loadingListing">
+				{{ loading ? (isEditMode ? 'Modification...' : 'Creation...') : (isEditMode ? "Enregistrer les modifications" : "Creer l'annonce") }}
 			</button>
 		</form>
 	</div>
