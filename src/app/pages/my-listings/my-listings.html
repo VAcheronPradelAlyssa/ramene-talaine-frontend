@@ -7,6 +7,7 @@
           <h3>{{ listing.title }}</h3>
           <p>{{ listing.description }}</p>
           <p><strong>Prix :</strong> {{ listing.price }} €</p>
+          <button (click)="delete(listing.id)" type="button" class="delete-btn">Supprimer</button>
         </li>
       </ul>
     </div>

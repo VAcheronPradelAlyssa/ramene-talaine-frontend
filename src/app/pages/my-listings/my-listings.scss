@@ -11,6 +11,23 @@
       margin-bottom: 1rem;
       padding: 1rem;
       background: #fafafa;
+      position: relative;
+      .delete-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 0.3rem 0.8rem;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: background 0.2s;
+      }
+      .delete-btn:hover {
+        background: #c0392b;
+      }
     }
   }
 }
