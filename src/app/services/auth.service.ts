@@ -64,12 +64,29 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    this.storeToken(response.token);
+    const token = this.extractToken(response);
+    if (token) {
+      this.storeToken(token);
+    } else {
+      localStorage.removeItem(this.tokenKey);
+      console.warn('Auth response did not contain a valid token');
+    }
     this.setCurrentUser(response.user ?? null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    const token = localStorage.getItem(this.tokenKey);
+
+    if (!token) {
+      return null;
+    }
+
+    const normalized = token.trim();
+    if (!normalized || normalized === 'undefined' || normalized === 'null') {
+      return null;
+    }
+
+    return normalized;
   }
 
   logout(): void {
@@ -80,5 +97,15 @@ export class AuthService {
 
   getProfile(): Observable<User> {
     return this.http.get<User>(`${environment.API_URL}/api/users/me`);
+  }
+
+  private extractToken(response: AuthResponse): string | null {
+    const candidate = response?.token ?? response?.accessToken;
+    if (typeof candidate !== 'string') {
+      return null;
+    }
+
+    const normalized = candidate.trim();
+    return normalized ? normalized : null;
   }
 }

@@ -1,5 +1,6 @@
 <section class="my-listings">
   <h2>Mes annonces</h2>
+  <p *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</p>
   <ng-container *ngIf="!loading; else loadingTpl">
     <div *ngIf="listings.length; else emptyTpl">
       <ul>
