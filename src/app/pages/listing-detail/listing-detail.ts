@@ -54,6 +54,13 @@ export class ListingDetail implements OnInit {
       this.listingService.getListingById(id).subscribe({
         next: (data) => {
           this.listing = data;
+
+          // Fallback: certains endpoints détail ne renvoient pas les couleurs,
+          // alors qu'elles sont présentes dans l'endpoint de liste.
+          if (!this.hasColorData(data)) {
+            this.hydrateColorsFromListings(id);
+          }
+
           this.loading = false;
           this.cdr.detectChanges();
         },
@@ -65,6 +72,45 @@ export class ListingDetail implements OnInit {
       });
     });
   }
+
+  private hasColorData(listing: Listing | undefined): boolean {
+    if (!listing) {
+      return false;
+    }
+
+    if (Array.isArray(listing.colors) && listing.colors.length > 0) {
+      return true;
+    }
+
+    return typeof listing.color === 'string' && listing.color.trim() !== '';
+  }
+
+  private hydrateColorsFromListings(id: string): void {
+    this.listingService.getAllListings().subscribe({
+      next: (listings) => {
+        const fromList = listings.find((item) => String(item.id) === String(id));
+        if (!fromList || !this.listing) {
+          return;
+        }
+
+        const colors = Array.isArray(fromList.colors) ? fromList.colors : undefined;
+        const color = fromList.color;
+
+        if ((colors && colors.length > 0) || (typeof color === 'string' && color.trim() !== '')) {
+          this.listing = {
+            ...this.listing,
+            colors: colors ?? this.listing.colors,
+            color: (typeof color === 'string' && color.trim() !== '') ? color : this.listing.color,
+          };
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        // Pas bloquant: on garde les données détail telles quelles.
+      },
+    });
+  }
+
     compName(id: number): string {
       const found = this.compositionsList.find(c => c.id === id);
       return found ? found.name : 'Matériau #' + id;
@@ -94,8 +140,23 @@ export class ListingDetail implements OnInit {
 
     if (Array.isArray(listing.colors)) {
       for (const color of listing.colors) {
-        const colorName = String(color?.colorName ?? '').trim();
-        const customColor = String(color?.customColor ?? '').trim();
+        const colorData = color as any;
+        const colorName = String(
+          colorData?.colorName ??
+          colorData?.name ??
+          colorData?.label ??
+          colorData?.value ??
+          colorData?.color?.name ??
+          colorData?.color?.label ??
+          colorData?.color?.value ??
+          ''
+        ).trim();
+        const customColor = String(
+          colorData?.customColor ??
+          colorData?.color?.customColor ??
+          colorData?.color?.custom ??
+          ''
+        ).trim();
 
         if (colorName) {
           labels.push(colorName);
@@ -108,8 +169,14 @@ export class ListingDetail implements OnInit {
       }
     }
 
-    if (labels.length === 0 && typeof listing.color === 'string' && listing.color.trim() !== '') {
-      labels.push(listing.color.trim());
+    if (labels.length === 0) {
+      const fallbackColor = typeof listing.color === 'string'
+        ? listing.color.trim()
+        : String((listing.color as any)?.name ?? (listing.color as any)?.label ?? (listing.color as any)?.value ?? '').trim();
+
+      if (fallbackColor !== '') {
+        labels.push(fallbackColor);
+      }
     }
 
     return [...new Set(labels)];

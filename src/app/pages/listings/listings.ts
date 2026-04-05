@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Router, NavigationEnd, RouterModule } from '@angular/router';
-import { BehaviorSubject, finalize, timeout, takeUntil, Subject } from 'rxjs';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { BehaviorSubject, Subject, finalize, takeUntil, timeout } from 'rxjs';
 import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
-
 @Component({
   selector: 'app-listings',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './listings.html',
   styleUrl: './listings.scss',
@@ -24,7 +24,7 @@ export class Listings implements OnInit {
 
   ngOnInit(): void {
     this.loadListings();
-    this.router.events.pipe(takeUntil(this.destroy$)).subscribe(event => {
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
       if (event instanceof NavigationEnd && event.urlAfterRedirects.includes('/listings')) {
         this.loadListings();
       }
@@ -40,23 +40,27 @@ export class Listings implements OnInit {
     this.loading$.next(true);
     this.errorMsg$.next('');
 
-    this.listingService.getAllListings().pipe(
-      timeout(10000),
-      finalize(() => {
-        this.loading$.next(false);
-      })
-    ).subscribe({
-      next: (listings) => {
-        this.listings$.next(listings);
-      },
-      error: (error) => {
-        this.errorMsg$.next(
-          error?.name === 'TimeoutError'
-            ? 'Le serveur met trop de temps a repondre.'
-            : (error?.error?.message || 'Erreur lors du chargement des annonces.')
-        );
-      },
-    });
+    this.listingService
+      .getAllListings()
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loading$.next(false);
+        })
+      )
+      .subscribe({
+        next: (listings: Listing[]) => {
+          this.listings$.next(listings);
+        },
+        error: (error: unknown) => {
+          const typedError = error as { name?: string; error?: { message?: string } };
+          this.errorMsg$.next(
+            typedError?.name === 'TimeoutError'
+              ? 'Le serveur met trop de temps a repondre.'
+              : typedError?.error?.message || 'Erreur lors du chargement des annonces.'
+          );
+        },
+      });
   }
 
   getImageUrl(listing: Listing): string {
@@ -71,5 +75,52 @@ export class Listings implements OnInit {
       return 'Echange';
     }
     return `${listing.price ?? 0} EUR`;
+  }
+
+  getColorLabels(listing: Listing): string[] {
+    const labels: string[] = [];
+
+    if (Array.isArray(listing.colors)) {
+      for (const color of listing.colors) {
+        const colorData = color as any;
+        const colorName = String(
+          colorData?.colorName ??
+          colorData?.name ??
+          colorData?.label ??
+          colorData?.value ??
+          colorData?.color?.name ??
+          colorData?.color?.label ??
+          colorData?.color?.value ??
+          ''
+        ).trim();
+        const customColor = String(
+          colorData?.customColor ??
+          colorData?.color?.customColor ??
+          colorData?.color?.custom ??
+          ''
+        ).trim();
+
+        if (colorName) {
+          labels.push(colorName);
+          continue;
+        }
+
+        if (customColor) {
+          labels.push(customColor);
+        }
+      }
+    }
+
+    if (labels.length === 0) {
+      const fallbackColor = typeof listing.color === 'string'
+        ? listing.color.trim()
+        : String((listing.color as any)?.name ?? (listing.color as any)?.label ?? (listing.color as any)?.value ?? '').trim();
+
+      if (fallbackColor !== '') {
+        labels.push(fallbackColor);
+      }
+    }
+
+    return [...new Set(labels)];
   }
 }

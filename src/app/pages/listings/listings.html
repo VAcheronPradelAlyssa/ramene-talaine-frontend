@@ -17,6 +17,13 @@
             <h2>{{ listing.title }}</h2>
             <p class="meta">{{ getTypeLabel(listing) }}</p>
             <p class="city">{{ listing.city }}</p>
+            <ng-container *ngIf="getColorLabels(listing).length > 0">
+              <p class="colors">
+                <span *ngFor="let color of getColorLabels(listing); let last = last">
+                  {{ color }}<span *ngIf="!last">, </span>
+                </span>
+              </p>
+            </ng-container>
           </div>
         </a>
       </article>
