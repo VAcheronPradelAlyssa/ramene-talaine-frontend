@@ -8,7 +8,7 @@
           <h3>{{ listing.title }}</h3>
           <p>{{ listing.description }}</p>
           <p><strong>Prix :</strong> {{ listing.price }} €</p>
-          <button *ngIf="listing.id as id" (click)="delete(id)" type="button" class="delete-btn">Supprimer</button>
+          <button *ngIf="listing.id as id" (click)="delete(id, listing.title)" type="button" class="delete-btn">Supprimer</button>
         </li>
       </ul>
     </div>

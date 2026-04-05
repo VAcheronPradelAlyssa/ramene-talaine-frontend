@@ -45,8 +45,15 @@ export class MyListings implements OnInit {
     });
   }
 
-  delete(id: string): void {
+  delete(id: string, title?: string): void {
     if (!id) return;
+
+    const listingLabel = title?.trim() ? `\"${title.trim()}\"` : 'cette annonce';
+    const shouldDelete = window.confirm(`Confirmer la suppression de ${listingLabel} ?`);
+    if (!shouldDelete) {
+      return;
+    }
+
     this.deleting = id;
     this.listingService.deleteListing(id).subscribe({
       next: () => {
