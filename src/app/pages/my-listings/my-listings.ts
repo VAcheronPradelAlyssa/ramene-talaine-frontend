@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Listing } from '../../models/listing.model';
+import { RouterModule } from '@angular/router';
+import { Listing, ListingType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { ListingService } from '../../services/listing.service';
   standalone: true,
   templateUrl: './my-listings.html',
   styleUrls: ['./my-listings.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
 })
 export class MyListings implements OnInit {
   listings: Listing[] = [];
@@ -77,5 +78,48 @@ export class MyListings implements OnInit {
     }
 
     return error.error?.message || 'Impossible de charger vos annonces.';
+  }
+
+  getImageUrl(listing: Listing): string {
+    return listing.imageUrls?.[0] || 'assets/logo/Ramene-ta-laine.png';
+  }
+
+  getTypeLabel(listing: Listing): string {
+    if (listing.type === ListingType.FREE) {
+      return 'Don';
+    }
+    if (listing.type === ListingType.EXCHANGE) {
+      return 'Echange';
+    }
+    return `${listing.price ?? 0} EUR`;
+  }
+
+  getColorLabels(listing: Listing): string[] {
+    const labels: string[] = [];
+
+    if (Array.isArray(listing.colors)) {
+      for (const color of listing.colors) {
+        const colorName = String(color?.colorName ?? '').trim();
+        const customColor = String(color?.customColor ?? '').trim();
+
+        if (colorName) {
+          labels.push(colorName);
+          continue;
+        }
+
+        if (customColor) {
+          labels.push(customColor);
+        }
+      }
+    }
+
+    if (labels.length === 0) {
+      const fallback = String(listing.color ?? '').trim();
+      if (fallback) {
+        labels.push(fallback);
+      }
+    }
+
+    return [...new Set(labels)];
   }
 }
