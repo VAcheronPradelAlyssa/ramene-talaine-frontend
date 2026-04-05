@@ -1,0 +1,16 @@
+.my-listings {
+  h2 {
+    margin-bottom: 1rem;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    li {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #fafafa;
+    }
+  }
+}

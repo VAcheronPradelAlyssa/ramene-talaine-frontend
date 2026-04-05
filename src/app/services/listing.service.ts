@@ -1,3 +1,13 @@
+  getMyListings(): Observable<Listing[]> {
+    return this.http.get<ListingsApiResponse>(`${this.baseUrl}/me`).pipe(
+      map((response) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return response.content ?? response.data ?? response.items ?? response.listings ?? [];
+      })
+    );
+  }
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
