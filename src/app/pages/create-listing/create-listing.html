@@ -1,77 +1,176 @@
 <section class="listing-shell">
 	<div class="listing-card">
-		<h1>Creer une annonce</h1>
+		<h1>{{ isEditMode ? 'Modifier une annonce' : 'Creer une annonce' }}</h1>
+		<p class="feedback" *ngIf="isEditMode">Mode edition : les champs existants sont pre-remplis.</p>
+		<p class="feedback" *ngIf="loadingListing">Chargement de l'annonce...</p>
+		<div *ngIf="isEditMode && debugMode" class="debug-block">
+			<strong>DEBUG listing charge :</strong>
+			<pre>{{ debugLoadedListing }}</pre>
+			<strong>DEBUG couleurs du formulaire :</strong>
+			<pre>{{ debugFormColors }}</pre>
+		</div>
 
-		<form #listingForm="ngForm" (ngSubmit)="onSubmit(listingForm)" class="listing-form" novalidate>
-			<label>
-				<span>Titre</span>
-				<input type="text" name="title" [(ngModel)]="formData.title" required />
-			</label>
+		<form [formGroup]="form" (ngSubmit)="onSubmit()" class="listing-form" novalidate>
+						<label>
+								<span>Titre</span>
+								<input type="text" formControlName="title" required />
+								<div class="error" *ngIf="form.get('title')?.invalid && (form.get('title')?.touched || submitted)">
+									Ce champ est obligatoire.
+								</div>
+						</label>
 
-			<label>
-				<span>Description</span>
-				<textarea name="description" [(ngModel)]="formData.description" rows="4" required></textarea>
-			</label>
+						<label>
+								<span>Description</span>
+								<textarea formControlName="description" rows="4" required></textarea>
+								<div class="error" *ngIf="form.get('description')?.invalid && (form.get('description')?.touched || submitted)">
+									Ce champ est obligatoire.
+								</div>
+						</label>
 
 			<div class="grid-2">
-				<label>
-					<span>Marque</span>
-					<input type="text" name="brand" [(ngModel)]="formData.brand" required />
-				</label>
+				<mat-form-field appearance="outline" class="full-width">
+					<mat-label>Marque</mat-label>
+					<input
+						type="text"
+						matInput
+						formControlName="brand"
+						[matAutocomplete]="auto"
+						required
+						(blur)="onBrandBlur()"
+					/>
+					<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBrandSelected($event)">
+						<mat-option *ngFor="let brand of filteredBrands$ | async" [value]="brand.name">
+							{{ brand.name }}
+						</mat-option>
+						<mat-option *ngIf="showOtherOption" [value]="'Autre'">Autre</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
 
-				<label>
-					<span>Composition</span>
-					<input type="text" name="composition" [(ngModel)]="formData.composition" required />
-				</label>
+				<div *ngIf="selectedBrand === 'Autre'">
+					<mat-form-field appearance="outline" class="full-width">
+						<mat-label>Nouvelle marque</mat-label>
+						<input matInput formControlName="newBrand" required />
+					</mat-form-field>
+				</div>
 
-				<label>
-					<span>Couleur</span>
-					<input type="text" name="color" [(ngModel)]="formData.color" required />
-				</label>
 
-				<label>
-					<span>Poids</span>
-					<input type="text" name="weight" [(ngModel)]="formData.weight" required />
-				</label>
+								<div formArrayName="compositions">
+									<div *ngFor="let compCtrl of compositions.controls; let i = index" [formGroupName]="i" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+										<label>
+											<span>Composition</span>
+											<select formControlName="compositionId" required>
+												<option value="" disabled>Choisir une composition</option>
+												<option *ngFor="let comp of compositionsList" [value]="comp.id">{{ comp.name }}</option>
+												<!-- <option value="Autre">Autre</option> -->
+											</select>
+										</label>
+										<!-- Champ "Nouvelle composition" supprimé car choix "Autre" retiré -->
+										<label>
+											<span>Pourcentage (optionnel)</span>
+											<input type="number" formControlName="percentage" min="0" max="100" placeholder="%" />
+										</label>
+										<button type="button" (click)="removeComposition(i)" *ngIf="compositions.length > 1">Supprimer</button>
+									</div>
+									<button type="button" (click)="addComposition()">Ajouter une composition</button>
+								</div>
 
-				<label>
-					<span>Longueur</span>
-					<input type="text" name="length" [(ngModel)]="formData.length" required />
-				</label>
+								<div formArrayName="colors">
+									<div *ngFor="let colorCtrl of colors.controls; let i = index" [formGroupName]="i" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+										<label>
+											<span>Couleur</span>
+											<input
+												type="text"
+												matInput
+												formControlName="colorQuery"
+												[matAutocomplete]="colorAuto"
+												placeholder="Choisir une couleur"
+												(blur)="onColorBlur(i)"
+											/>
+											<mat-autocomplete #colorAuto="matAutocomplete" (optionSelected)="onColorSelectionChange(i)">
+												<mat-option *ngFor="let color of filteredColors$[i] | async" [value]="color.name">{{ color.name }}</mat-option>
+											</mat-autocomplete>
+										</label>
+										<label *ngIf="colorCtrl.get('colorQuery')?.value === otherColorOption">
+											<span>Couleur personnalisée</span>
+											<input type="text" formControlName="customColor" placeholder="Saisissez une couleur" required />
+										</label>
+										<button type="button" (click)="removeColor(i)" *ngIf="colors.length > 1">Supprimer</button>
+									</div>
+									<button type="button" (click)="addColor()">Ajouter une couleur</button>
+									<div class="error" *ngIf="form.get('colors')?.invalid && (form.get('colors')?.touched || submitted)">
+										Veuillez sélectionner au moins une couleur valide.
+									</div>
+								</div>
+
+
+								<label>
+									<span>Poids (g)</span>
+									<input type="number" formControlName="weightValue" min="1" step="1" required style="width: 100px; display: inline-block;" pattern="^[0-9]+$" inputmode="numeric" />
+									<div class="error" *ngIf="form.get('weightValue')?.invalid && (form.get('weightValue')?.touched || submitted)">
+										Saisir un poids en grammes (nombre entier positif).
+									</div>
+								</label>
+
+								<label>
+										<span>Longueur</span>
+										<input type="number" formControlName="length" min="0" step="0.01" required />
+										<div class="error" *ngIf="form.get('length')?.invalid && (form.get('length')?.touched || submitted)">
+											Saisir une longueur numerique valide (0 ou plus).
+										</div>
+								</label>
 
 				<label>
 					<span>Type</span>
-					<select name="type" [(ngModel)]="formData.type" (ngModelChange)="onTypeChange()" required>
+					<select formControlName="type" (change)="onTypeChange()" required>
 						<option *ngFor="let type of listingTypes" [ngValue]="type">{{ type }}</option>
 					</select>
 				</label>
 
-				<label *ngIf="formData.type === listingType.SALE">
-					<span>Prix</span>
-					<input type="number" name="price" [(ngModel)]="formData.price" min="0" required />
-				</label>
+				   <label *ngIf="form.get('type')?.value === listingType.SALE">
+					   <span>Prix</span>
+					   <input type="number" formControlName="price" min="0" />
+					   <div class="error" *ngIf="form.get('price')?.invalid && (form.get('price')?.touched || submitted)">
+						   Saisir un prix (obligatoire pour la vente).
+					   </div>
+				   </label>
 
-				<label>
-					<span>Ville</span>
-					<input type="text" name="city" [(ngModel)]="formData.city" required />
-				</label>
+								<label>
+										<span>Ville</span>
+										<input type="text" formControlName="city" required />
+										<div class="error" *ngIf="form.get('city')?.invalid && (form.get('city')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 
-				<label>
-					<span>Code postal</span>
-					<input type="text" name="postalCode" [(ngModel)]="formData.postalCode" required />
-				</label>
+								<label>
+										<span>Code postal</span>
+										<input type="text" formControlName="postalCode" required />
+										<div class="error" *ngIf="form.get('postalCode')?.invalid && (form.get('postalCode')?.touched || submitted)">
+											Ce champ est obligatoire.
+										</div>
+								</label>
 			</div>
 
 			<label>
 				<span>Images (URLs separees par des virgules)</span>
-				<input type="text" name="imageUrls" [(ngModel)]="imageUrlsInput" placeholder="https://..., https://..." />
+				<input type="text" formControlName="imageUrls" placeholder="https://..., https://..." />
 			</label>
 
 			<p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
 			<p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
 
-			<button type="submit" [disabled]="loading || listingForm.invalid">
-				{{ loading ? 'Creation...' : 'Creer l\'annonce' }}
+			<div *ngIf="submitted && form.invalid" style="color: red; margin-top: 1rem;">
+				<strong>Champs invalides détectés :</strong>
+				<ul>
+					<li *ngFor="let key of form.controls | keyvalue" style="font-size: 0.95em;"
+						[hidden]="form.get(key.key)?.valid">
+						{{ key.key }} : invalide
+					</li>
+				</ul>
+			</div>
+
+			<button type="submit" [disabled]="loading || loadingListing">
+				{{ loading ? (isEditMode ? 'Modification...' : 'Creation...') : (isEditMode ? "Enregistrer les modifications" : "Creer l'annonce") }}
 			</button>
 		</form>
 	</div>

@@ -1,0 +1,44 @@
+<section class="listings-shell my-listings-shell">
+  <div class="listings-header">
+    <h1>Mes annonces</h1>
+    <p>Retrouve, gere et supprime facilement tes annonces.</p>
+  </div>
+
+  <p class="state loading" *ngIf="loading">Chargement de vos annonces...</p>
+  <p class="state error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="listings-grid" *ngIf="!loading && !errorMessage">
+    <article class="listing-card" *ngFor="let listing of listings">
+      <a *ngIf="listing.id as id" [routerLink]="['/annonces', id]" class="listing-link">
+        <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
+
+        <div class="listing-body">
+          <h2>{{ listing.title }}</h2>
+          <p class="meta">{{ getTypeLabel(listing) }}</p>
+          <p class="city">{{ listing.city }}</p>
+          <ng-container *ngIf="getColorLabels(listing).length > 0">
+            <p class="colors">
+              <span *ngFor="let color of getColorLabels(listing); let last = last">
+                {{ color }}<span *ngIf="!last">, </span>
+              </span>
+            </p>
+          </ng-container>
+        </div>
+      </a>
+
+      <div class="action-buttons" *ngIf="listing.id as id">
+        <a [routerLink]="['/edit-listing', id]" class="edit-btn">Modifier</a>
+        <button
+          (click)="delete(id, listing.title)"
+          type="button"
+          class="delete-btn"
+          [disabled]="deleting === id"
+        >
+          {{ deleting === id ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </div>
+    </article>
+
+    <p class="state empty" *ngIf="listings.length === 0">Aucune annonce trouvee.</p>
+  </div>
+</section>

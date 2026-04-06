@@ -1,0 +1,72 @@
+
+<div class="listing-detail" *ngIf="!loading && listing; else loadingTpl">
+	<!-- Titre -->
+	<section class="section-title" *ngIf="listing.title">
+		<h2>{{ listing.title }}</h2>
+	</section>
+
+	<!-- Description -->
+	<section class="section-desc" *ngIf="listing.description">
+		<h3>Description</h3>
+		<p>{{ listing.description }}</p>
+	</section>
+
+	<!-- Prix -->
+	<section class="section-price" *ngIf="listing.price != null">
+		<h3>Prix</h3>
+		<p>{{ listing.price }} €</p>
+	</section>
+
+	<!-- Couleur -->
+	<section class="section-color" *ngIf="getColorLabels(listing).length">
+		<h3>Couleur</h3>
+		<p>{{ getColorLabels(listing).join(', ') }}</p>
+	</section>
+
+	<!-- Localisation -->
+	<section class="section-location" *ngIf="listing.city || listing.postalCode">
+		<h3>Localisation</h3>
+		<p>
+			<span *ngIf="listing.city">{{ listing.city }}</span>
+			<span *ngIf="listing.city && listing.postalCode">, </span>
+			<span *ngIf="listing.postalCode">{{ listing.postalCode }}</span>
+		</p>
+	</section>
+
+	<!-- Caractéristiques -->
+	<section class="section-details">
+		<h3>Détails</h3>
+		<ul>
+			<li *ngIf="getBrandLabel(listing) as brandLabel">
+				<b>Marque:</b> {{ brandLabel }}
+			</li>
+			<li *ngIf="listing.seller?.surnom || listing.sellerName || listing.username">
+				<b>Vendeur:</b>
+				<ng-container *ngIf="listing.seller?.surnom; else sellerNameTpl">{{ listing.seller?.surnom }}</ng-container>
+				<ng-template #sellerNameTpl>
+					<ng-container *ngIf="listing.sellerName; else usernameTpl">{{ listing.sellerName }}</ng-container>
+				</ng-template>
+				<ng-template #usernameTpl>{{ listing.username }}</ng-template>
+			</li>
+		</ul>
+	</section>
+
+	<!-- Composition -->
+	<section class="section-compositions" *ngIf="listing.compositions && listing.compositions.length">
+		<h3>Composition</h3>
+		<ul>
+			<li *ngFor="let comp of listing.compositions">
+				<ng-container *ngIf="comp.compositionId">
+					{{ compName(comp.compositionId) }}<span *ngIf="comp.percentage"> : {{ comp.percentage }}%</span>
+				</ng-container>
+				<ng-container *ngIf="comp.customComposition">
+					{{ comp.customComposition }}<span *ngIf="comp.percentage"> : {{ comp.percentage }}%</span>
+				</ng-container>
+			</li>
+		</ul>
+	</section>
+</div>
+<ng-template #loadingTpl>
+	<div class="loading" *ngIf="loading">Chargement...</div>
+	<div class="error" *ngIf="error">{{ error }}</div>
+</ng-template>

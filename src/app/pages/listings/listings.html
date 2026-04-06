@@ -4,20 +4,30 @@
     <p>Decouvre les annonces disponibles.</p>
   </div>
 
-  <p class="state loading" *ngIf="loading">Chargement des annonces...</p>
-  <p class="state error" *ngIf="errorMsg">{{ errorMsg }}</p>
+  <p class="state loading" *ngIf="loading$ | async">Chargement des annonces...</p>
+  <p class="state error" *ngIf="errorMsg$ | async as errorMsg" [hidden]="!errorMsg">{{ errorMsg }}</p>
 
-  <div class="listings-grid" *ngIf="!loading && !errorMsg">
-    <article class="listing-card" *ngFor="let listing of listings">
-      <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
+  <div class="listings-grid" *ngIf="!(loading$ | async) && !(errorMsg$ | async)">
+    <ng-container *ngIf="listings$ | async as listings">
+      <article class="listing-card" *ngFor="let listing of listings">
+        <a [routerLink]="['/annonces', listing.id]" class="listing-link">
+          <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-image" />
 
-      <div class="listing-body">
-        <h2>{{ listing.title }}</h2>
-        <p class="meta">{{ getTypeLabel(listing) }}</p>
-        <p class="city">{{ listing.city }}</p>
-      </div>
-    </article>
-
-    <p class="state empty" *ngIf="listings.length === 0">Aucune annonce disponible.</p>
+          <div class="listing-body">
+            <h2>{{ listing.title }}</h2>
+            <p class="meta">{{ getTypeLabel(listing) }}</p>
+            <p class="city">{{ listing.city }}</p>
+            <ng-container *ngIf="getColorLabels(listing).length > 0">
+              <p class="colors">
+                <span *ngFor="let color of getColorLabels(listing); let last = last">
+                  {{ color }}<span *ngIf="!last">, </span>
+                </span>
+              </p>
+            </ng-container>
+          </div>
+        </a>
+      </article>
+      <p class="state empty" *ngIf="listings.length === 0">Aucune annonce disponible.</p>
+    </ng-container>
   </div>
 </section>

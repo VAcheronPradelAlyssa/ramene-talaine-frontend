@@ -28,7 +28,17 @@ export class ListingService {
         if (Array.isArray(response)) {
           return response;
         }
+        return response.content ?? response.data ?? response.items ?? response.listings ?? [];
+      })
+    );
+  }
 
+  getMyListings(): Observable<Listing[]> {
+    return this.http.get<ListingsApiResponse>(`${this.baseUrl}/me`).pipe(
+      map((response) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
         return response.content ?? response.data ?? response.items ?? response.listings ?? [];
       })
     );
@@ -36,6 +46,10 @@ export class ListingService {
 
   getListingById(id: string): Observable<Listing> {
     return this.http.get<Listing>(`${this.baseUrl}/${id}`);
+  }
+
+  updateListing(id: string, listing: Partial<Listing>): Observable<Listing> {
+    return this.http.put<Listing>(`${this.baseUrl}/${id}`, listing);
   }
 
   deleteListing(id: string): Observable<void> {

@@ -1,3 +1,36 @@
+// Harmonisation Angular Material et champs natifs
+.full-width {
+	width: 100%;
+}
+
+mat-form-field.full-width {
+	width: 100%;
+}
+
+mat-form-field.outline, mat-form-field[appearance="outline"] {
+	--mat-form-field-outline-width: 1px;
+	--mat-form-field-outline-color: rgba(97, 72, 49, 0.2);
+	--mat-form-field-outline-radius: 12px;
+	--mat-form-field-container-padding: 0.8rem 0.9rem;
+	background: none;
+}
+
+mat-form-field.mat-focused.outline, mat-form-field.mat-focused[appearance="outline"] {
+	--mat-form-field-outline-color: #d17c3a;
+	box-shadow: 0 0 0 3px rgba(209, 124, 58, 0.14);
+}
+
+input[matInput], textarea[matInput] {
+	border-radius: 12px !important;
+	padding: 0.8rem 0.9rem !important;
+	font: inherit;
+	background: none !important;
+}
+
+input[matInput]:focus, textarea[matInput]:focus {
+	border-color: #d17c3a !important;
+	box-shadow: 0 0 0 3px rgba(209, 124, 58, 0.14) !important;
+}
 .listing-shell {
 	min-height: calc(100vh - 4rem);
 	padding: 2rem 1rem;
@@ -70,6 +103,24 @@ select:focus {
 
 .feedback.success {
 	color: #1f7a3b;
+}
+
+.debug-block {
+	margin: 0.75rem 0 1.25rem;
+	padding: 0.8rem;
+	border-radius: 12px;
+	background: #f7f1ea;
+	border: 1px solid rgba(124, 87, 52, 0.16);
+}
+
+.debug-block pre {
+	margin: 0.4rem 0 0.8rem;
+	padding: 0.6rem;
+	background: #fff;
+	border-radius: 8px;
+	overflow: auto;
+	font-size: 0.82rem;
+	line-height: 1.35;
 }
 
 button {
