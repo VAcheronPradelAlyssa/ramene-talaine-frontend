@@ -4,13 +4,13 @@
             <button class="menu-toggle" type="button" (click)="toggleMobileMenu()" *ngIf="isMobile">
                 <mat-icon>menu</mat-icon>
             </button>
-            <div class="logo" role="img" aria-label="Ramene ta Laine">
+            <a class="logo" routerLink="/" aria-label="Aller a la page d'accueil">
                 <img src="assets/logo/Ramene-ta-laine.png" alt="Ramene ta Laine" class="logo-image">
-            </div>
+            </a>
         </div>
 
         <nav class="nav-center" [class.mobile-open]="mobileMenuOpen" *ngIf="!isMobile || mobileMenuOpen">
-            <button mat-button type="button">Accueil</button>
+            <a mat-button routerLink="/">Accueil</a>
             <a mat-button routerLink="/listings">Annonces</a>
 
             <div class="dropdown-trigger" [matMenuTriggerFor]="categoriesMenu">
@@ -33,10 +33,10 @@
                     <mat-icon>construction</mat-icon>
                     <span>Crochets</span>
                 </button>
-                <button mat-menu-item type="button">
-                    <mat-icon>description</mat-icon>
-                    <span>Patrons</span>
-                </button>
+                    <button mat-menu-item type="button">
+                        <mat-icon>book</mat-icon>
+                        <span>Patrons</span>
+                    </button>
                 <button mat-menu-item type="button">
                     <mat-icon>linear_scale</mat-icon>
                     <span>Fils et Cordons</span>
