@@ -4,6 +4,7 @@
 	<div *ngIf="loading" class="loading">Inscription en cours...</div>
 	<div *ngIf="successMsg" class="success">{{ successMsg }}</div>
 	<div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+	<div *ngIf="emailErrorMsg" class="error">{{ emailErrorMsg }}</div>
 
 	<form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate>
 		<div class="form-group">
@@ -34,6 +35,10 @@
 			<label for="surnom">Surnom *</label>
 			<input id="surnom" name="surnom" type="text" required [(ngModel)]="formData.surnom" #surnom="ngModel">
 			<div class="error" *ngIf="surnom.invalid && (surnom.dirty || surnom.touched)">Le surnom est obligatoire.</div>
+			<div class="error" *ngIf="surnomErrorMsg">{{ surnomErrorMsg }}</div>
+			<button *ngIf="surnomSuggestion" type="button" (click)="utiliserSuggestionSurnom()" class="suggestion-btn">
+				Utiliser le surnom suggéré : <strong>{{ surnomSuggestion }}</strong>
+			</button>
 		</div>
 
 		<div class="form-group">
