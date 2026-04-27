@@ -38,11 +38,16 @@ export class Inscription {
         next: (response: AuthResponse) => {
           this.successMsg = 'Inscription réussie !';
           this.loading = false;
+          // Stocker le token JWT immédiatement
+          if (response.token) {
+            this.auth.storeToken(response.token);
+          }
+          // Considérer l'utilisateur comme connecté
           this.auth.setCurrentUser(response.user ?? this.formData);
           this.router.navigate(['/']);
         },
         error: (err: any) => {
-          this.errorMsg = err?.error?.message || 'Erreur lors de l\'inscription.';
+          this.errorMsg = err?.error?.message || "Erreur lors de l'inscription.";
           this.loading = false;
         }
       });
