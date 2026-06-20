@@ -19,17 +19,14 @@ export class Home {
   search(): void {
     const q = this.searchQuery.trim();
     if (!q) return;
-    console.log('Recherche:', q);
-    // Ex: this.router.navigate(['/search'], { queryParams: { q } });
+    // TODO: this.router.navigate(['/search'], { queryParams: { q } });
   }
 
   goToCategory(category: string): void {
-    console.log('Categorie:', category);
-    // Ex: this.router.navigate(['/categories', category]);
+    // TODO: this.router.navigate(['/categories', category]);
   }
 
   goToRegister(): void {
-    console.log('Aller a inscription');
-    // Ex: this.router.navigate(['/register']);
+    void this.router.navigate(['/inscription']);
   }
 }

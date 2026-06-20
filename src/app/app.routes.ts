@@ -12,7 +12,7 @@ import { ListingDetail } from './pages/listing-detail/listing-detail';
 import { MyListings } from './pages/my-listings/my-listings';
 
 export const routes: Routes = [
-  { path: '', component: Home, canActivate: [authGuard] },
+  { path: '', component: Home },
   { path: 'inscription', component: Inscription },
   { path: 'connexion', component: Connexion },
   { path: 'listings', component: Listings, canActivate: [authGuard] },

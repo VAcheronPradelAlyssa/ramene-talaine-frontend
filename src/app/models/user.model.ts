@@ -3,8 +3,9 @@ export interface User {
   prenom: string;
   nom: string;
   email: string;
-  password: string;
+  password?: string;
   surnom: string;
+  username?: string;
   ville?: string;
   createdAt?: Date;
   updatedAt?: Date;

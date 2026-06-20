@@ -14,9 +14,27 @@ import { BrandService } from '../../services/brand.service';
 import { AuthService } from '../../services/auth.service';
 import { ColorService, ColorOption } from '../../services/color.service';
 
+interface ListingPayload {
+  title: string;
+  description: string;
+  brandId: number | null;
+  customBrand?: string;
+  color: string;
+  colors?: Array<{ colorId?: number | string; customColor?: string }>;
+  weight: number;
+  weightUnit: string;
+  length?: number;
+  type: ListingType;
+  price?: number | null;
+  city: string;
+  postalCode: string;
+  imageUrls: string[];
+  compositions?: Array<{ compositionId?: number; customComposition?: string; percentage?: string | null }>;
+  sellerId?: string;
+}
+
 @Component({
   selector: 'app-create-listing',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -34,9 +52,6 @@ export class CreateListing implements OnInit {
   editListingId: string | null = null;
   loadingListing = false;
   private listingToEdit: Listing | null = null;
-  debugMode = true;
-  debugLoadedListing = '';
-  debugFormColors = '';
   readonly otherColorOption = 'Autre';
   form: FormGroup;
   compositionAutre: string = '';
@@ -297,12 +312,11 @@ export class CreateListing implements OnInit {
   }
 
   searchBrands(query: string): Observable<{ id: number; name: string }[]> {
-    if (!query || query === 'Autre') {
-      return this.brandService.getBrands();
-    }
-    return this.brandService.getBrands().pipe(
-      map(brands => brands.filter(b => b.name.toLowerCase().includes(query.toLowerCase())))
-    );
+    const filtered =
+      !query || query === 'Autre'
+        ? this.brands
+        : this.brands.filter((b) => b.name.toLowerCase().includes(query.toLowerCase()));
+    return of(filtered);
   }
 
   onBrandSelected(event: MatAutocompleteSelectedEvent) {
@@ -353,32 +367,22 @@ export class CreateListing implements OnInit {
 
     const compositionsPayload = formValue.compositions.map((c: any) => {
       if (c.compositionId === 'Autre' || !c.compositionId) {
-        return {
-          customComposition: c.customComposition,
-          percentage: c.percentage || null
-        };
-      } else {
-        return {
-          compositionId: Number(c.compositionId),
-          percentage: c.percentage || null
-        };
+        return { customComposition: c.customComposition, percentage: c.percentage || null };
       }
+      return { compositionId: Number(c.compositionId), percentage: c.percentage || null };
     });
 
     const colorsPayload = (formValue.colors || [])
       .map((c: any) => {
         const colorQueryValue = String(c.colorQuery ?? '').trim();
         const customColorValue = String(c.customColor ?? '').trim();
-
-        if (!colorQueryValue) {
-          return null;
-        }
-
+        if (!colorQueryValue) return null;
         if (colorQueryValue === this.otherColorOption) {
           return customColorValue ? { customColor: customColorValue } : null;
         }
-
-        const exactMatch = this.colorsList.find((color) => color.name.toLowerCase() === colorQueryValue.toLowerCase());
+        const exactMatch = this.colorsList.find(
+          (color) => color.name.toLowerCase() === colorQueryValue.toLowerCase()
+        );
         return exactMatch ? { colorId: this.normalizeColorId(exactMatch.id) } : null;
       })
       .filter((c: any) => c !== null);
@@ -387,16 +391,11 @@ export class CreateListing implements OnInit {
       .map((c: any) => {
         const colorQueryValue = String(c.colorQuery ?? '').trim();
         const customColorValue = String(c.customColor ?? '').trim();
-
-        if (!colorQueryValue) {
-          return null;
-        }
-
-        if (colorQueryValue === this.otherColorOption) {
-          return customColorValue || null;
-        }
-
-        const exactMatch = this.colorsList.find((color) => color.name.toLowerCase() === colorQueryValue.toLowerCase());
+        if (!colorQueryValue) return null;
+        if (colorQueryValue === this.otherColorOption) return customColorValue || null;
+        const exactMatch = this.colorsList.find(
+          (color) => color.name.toLowerCase() === colorQueryValue.toLowerCase()
+        );
         return exactMatch?.name ?? colorQueryValue;
       })
       .filter((value: string | null) => value !== null);
@@ -407,94 +406,45 @@ export class CreateListing implements OnInit {
       return;
     }
 
-    // Construction stricte du payload selon le format attendu
-    let payload: any = {
+    const brandPart: { brandId: number | null; customBrand?: string } = isOtherBrand
+      ? { brandId: null, customBrand: newBrandValue }
+      : { brandId: this.brands.find((b) => b.name === brandValue || b.id === Number(brandValue))?.id ?? null };
+
+    const payload: ListingPayload = {
       title: formValue.title,
       description: formValue.description,
-      brandId: null,
+      ...brandPart,
       color: colorLabels.join(', '),
       colors: colorsPayload,
       weight: Number(formValue.weightValue),
       weightUnit: 'g',
-      length: formValue.length ? Number(formValue.length) : undefined,
-      type: formValue.type, // à adapter si besoin (ex: 'VETEMENT')
-      price: formValue.price,
+      ...(formValue.length ? { length: Number(formValue.length) } : {}),
+      type: formValue.type,
+      price: formValue.type === ListingType.SALE ? (formValue.price ?? null) : null,
       city: formValue.city,
       postalCode: formValue.postalCode,
-      imageUrls: (formValue.imageUrls || '').split(',').map((url: string) => url.trim()).filter((url: string) => !!url),
-      compositions: compositionsPayload
+      imageUrls: (formValue.imageUrls || '')
+        .split(',')
+        .map((url: string) => url.trim())
+        .filter((url: string) => !!url),
+      ...(compositionsPayload.length > 0 ? { compositions: compositionsPayload } : {}),
     };
-    // Ajout du champ composition si présent dans le formulaire (texte libre)
-    if (formValue.composition && formValue.composition.trim() !== '') {
-      payload.composition = formValue.composition;
-    }
 
-      // (Bloc supprimé : gestion de la marque déjà faite plus haut)
-
-    // Mapping strict de la marque pour le backend.
-    if (isOtherBrand) {
-      payload.brandId = null;
-      payload.customBrand = newBrandValue;
-    } else {
-      const found = this.brands.find(b => b.name === brandValue || b.id === Number(brandValue));
-      if (found) {
-        payload.brandId = found.id;
-      }
-      delete payload.customBrand;
-    }
-
-    // Ne jamais envoyer les champs de formulaire bruts.
-    delete payload.brand;
-    delete payload.newBrand;
-
-    // Ne pas envoyer length si vide
-    if (payload.length === undefined || payload.length === null || payload.length === '') {
-      delete payload.length;
-    }
-    // Ne pas envoyer composition si vide
-    if (!payload.composition || payload.composition.trim() === '') {
-      delete payload.composition;
-    }
-    // Ne pas envoyer price si null
-    if (payload.price === null || payload.price === undefined || payload.price === '') {
-      delete payload.price;
-    }
-    // Ne pas envoyer compositions si vide
-    if (!payload.compositions || !Array.isArray(payload.compositions) || payload.compositions.length === 0) {
-      delete payload.compositions;
-    }
-    if (!payload.colors || !Array.isArray(payload.colors) || payload.colors.length === 0) {
-      delete payload.colors;
-    }
-    // Nettoyage des champs optionnels pour éviter d'envoyer null
-    if (payload.customBrand == null || payload.customBrand === '') {
-      delete payload.customBrand;
-    }
-    if (payload.composition == null || payload.composition === '') {
-      delete payload.composition;
-    }
-
-    if (formValue.type === ListingType.SALE && formValue.price != null) {
-      payload.price = formValue.price;
-    } else {
-      payload.price = null; // Set price to null for non-SALE types
-    }
-
-    // Ajout du sellerId si utilisateur connecté
-    const user = (this.authService as any)._currentUser?.value;
-    if (user && user.id) {
+    const user = this.authService.getCurrentUser();
+    if (user?.id) {
       payload.sellerId = user.id;
     }
 
-    const request$ = this.isEditMode && this.editListingId
-      ? this.listingService.updateListing(this.editListingId, payload)
-      : this.listingService.createListing(payload);
+    const request$ =
+      this.isEditMode && this.editListingId
+        ? this.listingService.updateListing(this.editListingId, payload as unknown as Partial<Listing>)
+        : this.listingService.createListing(payload as unknown as Partial<Listing>);
 
     request$.subscribe({
       next: () => {
         this.successMsg = this.isEditMode
-          ? 'Annonce modifiee avec succes.'
-          : 'Annonce creee avec succes.';
+          ? 'Annonce modifiée avec succès.'
+          : 'Annonce créée avec succès.';
         this.loading = false;
         if (!this.isEditMode) {
           this.form.reset({ type: ListingType.SALE });
@@ -513,9 +463,8 @@ export class CreateListing implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error: any) => {
-        this.errorMsg = error?.error?.message || 'Erreur lors de l\'enregistrement de l\'annonce.';
+        this.errorMsg = error?.error?.message || "Erreur lors de l'enregistrement de l'annonce.";
         this.loading = false;
-        // Ne pas reset submitted ici pour garder l'affichage des erreurs
         this.cdr.detectChanges();
       },
     });
@@ -534,7 +483,6 @@ export class CreateListing implements OnInit {
     this.listingService.getListingById(id).subscribe({
       next: (listing) => {
         this.listingToEdit = listing;
-        this.debugLoadedListing = JSON.stringify(listing, null, 2);
         this.populateFormForEdit(listing);
 
         if (!this.hasColorData(listing)) {
@@ -546,7 +494,7 @@ export class CreateListing implements OnInit {
       },
       error: (error) => {
         this.loadingListing = false;
-        this.errorMsg = error?.error?.message || 'Impossible de charger l\'annonce a modifier.';
+        this.errorMsg = error?.error?.message || "Impossible de charger l'annonce à modifier.";
         this.cdr.detectChanges();
       },
     });
@@ -653,7 +601,6 @@ export class CreateListing implements OnInit {
     }
 
     this.onTypeChange();
-    this.refreshDebugFormColors();
   }
 
   private patchMissingColorLabels(): void {
@@ -683,8 +630,6 @@ export class CreateListing implements OnInit {
         colorGroup.patchValue({ colorQuery: resolved });
       }
     }
-
-    this.refreshDebugFormColors();
   }
 
   private extractFallbackColorLabels(listing: Listing): string[] {
@@ -783,17 +728,8 @@ export class CreateListing implements OnInit {
       color: ((source as any).color ?? (this.listingToEdit as any).color) as any,
     };
 
-    this.debugLoadedListing = JSON.stringify(this.listingToEdit, null, 2);
     this.populateFormForEdit(this.listingToEdit);
     this.cdr.detectChanges();
   }
 
-  private refreshDebugFormColors(): void {
-    const value = this.colors.controls.map((control, index) => ({
-      index,
-      colorQuery: String(control.get('colorQuery')?.value ?? ''),
-      customColor: String(control.get('customColor')?.value ?? ''),
-    }));
-    this.debugFormColors = JSON.stringify(value, null, 2);
-  }
 }

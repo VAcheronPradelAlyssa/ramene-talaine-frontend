@@ -24,15 +24,18 @@ export class AuthService {
       .pipe(tap((response) => this.handleAuthResponse(response)));
   }
 
-  register(email: string, password: string): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.authBaseUrl}/register`, { email, password })
-      .pipe(tap((response) => this.handleAuthResponse(response)));
-  }
-
   signup(user: User): Observable<AuthResponse> {
+    const payload = {
+      prenom: user.prenom,
+      nom: user.nom,
+      email: user.email,
+      password: user.password,
+      username: user.surnom,
+      ville: user.ville,
+    };
+
     return this.http
-      .post<AuthResponse>(`${this.authBaseUrl}/signup`, user)
+      .post<AuthResponse>(`${this.authBaseUrl}/register`, payload)
       .pipe(tap((response) => this.handleAuthResponse(response)));
   }
 
@@ -71,7 +74,12 @@ export class AuthService {
       localStorage.removeItem(this.tokenKey);
       console.warn('Auth response did not contain a valid token');
     }
-    this.setCurrentUser(response.user ?? null);
+
+    this.setCurrentUser(this.normalizeUser(response.user ?? null));
+  }
+
+  getCurrentUser(): User | null {
+    return this._currentUser.value;
   }
 
   getToken(): string | null {
@@ -107,5 +115,17 @@ export class AuthService {
 
     const normalized = candidate.trim();
     return normalized ? normalized : null;
+  }
+
+  private normalizeUser(user: User | null): User | null {
+    if (!user) {
+      return null;
+    }
+
+    return {
+      ...user,
+      surnom: user.surnom ?? user.username ?? '',
+      username: user.username ?? user.surnom,
+    };
   }
 }

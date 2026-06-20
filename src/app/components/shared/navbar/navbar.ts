@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -11,10 +12,8 @@ import { RouterModule } from '@angular/router';
 import { User } from '../../../models/user.model';
 import { AuthService } from '../../../services/auth.service';
 
-
 @Component({
   selector: 'app-navbar',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -30,24 +29,26 @@ import { AuthService } from '../../../services/auth.service';
   styleUrl: './navbar.scss',
 })
 export class Navbar implements OnInit {
+  private auth = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
+
   isMobile = false;
   mobileMenuOpen = false;
   searchBarOpen = false;
   searchQuery = '';
-
   currentUser: User | null = null;
-
-  constructor(private auth: AuthService) {}
-
-  ngOnInit(): void {
-    this.auth.currentUser$.subscribe((user: User | null) => {
-      this.currentUser = user;
-    });
-  }
   unreadMessagesCount = 0;
   notifications: string[] = [];
   notificationsCount = 0;
   favoritesCount = 0;
+
+  ngOnInit(): void {
+    this.auth.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((user) => {
+        this.currentUser = user;
+      });
+  }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -62,9 +63,6 @@ export class Navbar implements OnInit {
     if (!query) {
       return;
     }
-
-    // Placeholder action until a real search page exists.
-    console.log('Recherche:', query);
   }
 
   logout(): void {
