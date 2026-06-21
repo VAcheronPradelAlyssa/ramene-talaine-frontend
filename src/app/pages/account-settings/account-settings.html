@@ -25,12 +25,13 @@
           Passez en compte Pro pour accéder au dashboard de suivi, à la génération automatique de factures,
           aux statistiques de ventes et à la mise en avant de vos annonces.
         </p>
-        <p class="feedback success" *ngIf="proSuccessMsg">{{ proSuccessMsg }}</p>
         <p class="feedback error" *ngIf="proErrorMsg">{{ proErrorMsg }}</p>
         <button class="btn-pro" (click)="requestPro()" [disabled]="proLoading">
           {{ proLoading ? 'Envoi en cours…' : 'Demander un compte Pro (gratuit)' }}
         </button>
       </div>
+
+      <p class="feedback success" *ngIf="proSuccessMsg">{{ proSuccessMsg }}</p>
     </div>
 
     <div class="divider"></div>

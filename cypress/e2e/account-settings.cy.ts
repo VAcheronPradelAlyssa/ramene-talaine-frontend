@@ -40,8 +40,10 @@ describe('Page paramètres du compte', () => {
 
     it('masque la confirmation après clic sur Annuler', () => {
       cy.contains('Supprimer mon compte').click();
+      // "Oui, supprimer" n'apparaît que dans le bloc de confirmation
+      cy.contains('Oui, supprimer').should('be.visible');
       cy.contains('Annuler').click();
-      cy.contains('irréversible').should('not.exist');
+      cy.contains('Oui, supprimer').should('not.exist');
     });
 
     it('appelle l\'API et redirige vers / après confirmation de suppression', () => {
