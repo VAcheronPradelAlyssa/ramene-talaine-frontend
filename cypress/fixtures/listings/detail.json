@@ -1,0 +1,27 @@
+{
+  "id": "10",
+  "title": "Pelote Drops Karisma bleue",
+  "description": "Pelote neuve, jamais utilisée. Coloris bleu marine. Idéale pour un pull adulte.",
+  "brand": { "id": 3, "name": "Drops" },
+  "brandId": 3,
+  "customBrand": null,
+  "composition": "Laine mérinos",
+  "compositions": [{ "compositionId": 1, "percentage": 100 }],
+  "color": "Bleu",
+  "colors": [{ "colorName": "Bleu marine" }],
+  "weight": "50",
+  "length": "100",
+  "type": "SALE",
+  "price": 4.5,
+  "city": "Lyon",
+  "postalCode": "69001",
+  "imageUrls": ["https://picsum.photos/seed/laine1/800/600"],
+  "sellerName": "alyssav",
+  "seller": {
+    "id": "1",
+    "prenom": "Alyssa",
+    "nom": "Vacheron",
+    "surnom": "alyssav"
+  },
+  "createdAt": "2025-05-10T10:00:00Z"
+}

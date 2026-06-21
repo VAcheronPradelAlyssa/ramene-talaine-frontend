@@ -1,0 +1,42 @@
+[
+  {
+    "id": "10",
+    "title": "Pelote Drops Karisma bleue",
+    "description": "Pelote neuve, jamais utilisée.",
+    "brand": { "id": 3, "name": "Drops" },
+    "brandId": 3,
+    "customBrand": null,
+    "composition": "Laine mérinos",
+    "compositions": [{ "compositionId": 1, "percentage": 100 }],
+    "color": "Bleu",
+    "colors": [{ "colorName": "Bleu" }],
+    "weight": "50",
+    "length": "100",
+    "type": "SALE",
+    "price": 4.5,
+    "city": "Lyon",
+    "postalCode": "69001",
+    "imageUrls": ["https://picsum.photos/seed/laine1/400/300"],
+    "createdAt": "2025-05-10T10:00:00Z"
+  },
+  {
+    "id": "13",
+    "title": "Aiguilles Addi circulaires 3.5mm",
+    "description": "Lot de 3 câbles, bon état général.",
+    "brand": { "id": 7, "name": "Addi" },
+    "brandId": 7,
+    "customBrand": null,
+    "composition": "",
+    "compositions": [],
+    "color": "",
+    "colors": [],
+    "weight": "80",
+    "length": "60",
+    "type": "EXCHANGE",
+    "price": null,
+    "city": "Lyon",
+    "postalCode": "69003",
+    "imageUrls": [],
+    "createdAt": "2025-06-05T12:00:00Z"
+  }
+]

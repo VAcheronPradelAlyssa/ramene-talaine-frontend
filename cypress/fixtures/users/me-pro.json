@@ -1,0 +1,15 @@
+{
+  "id": "2",
+  "prenom": "Sophie",
+  "nom": "Marchand",
+  "email": "sophie@boutique.fr",
+  "surnom": "sophiem",
+  "username": "sophiem",
+  "ville": "Paris",
+  "bio": "Boutique de laines artisanales depuis 2015.",
+  "avatarUrl": "https://picsum.photos/seed/sophie/100",
+  "accountType": "PRO",
+  "emailVerified": true,
+  "createdAt": "2024-06-01T08:00:00Z",
+  "updatedAt": "2025-05-10T14:00:00Z"
+}

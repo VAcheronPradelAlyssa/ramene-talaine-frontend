@@ -1,0 +1,14 @@
+{
+  "id": "42",
+  "prenom": "Marie",
+  "nom": "Dupont",
+  "email": "marie@test.fr",
+  "surnom": "mariescrochet",
+  "username": "mariescrochet",
+  "ville": "Bordeaux",
+  "bio": "Accro au granny square et aux couleurs vives !",
+  "avatarUrl": null,
+  "accountType": "INDIVIDUAL",
+  "emailVerified": true,
+  "createdAt": "2025-03-20T09:00:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "1",
+  "prenom": "Alyssa",
+  "nom": "Vacheron",
+  "email": "alyssa@ramene.fr",
+  "surnom": "alyssav",
+  "username": "alyssav",
+  "ville": "Lyon",
+  "bio": "Passionnée de tricot et crochet.",
+  "avatarUrl": null,
+  "accountType": "INDIVIDUAL",
+  "emailVerified": true,
+  "createdAt": "2025-01-15T10:00:00Z",
+  "updatedAt": "2025-06-01T08:30:00Z"
+}
