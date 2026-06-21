@@ -1,0 +1,64 @@
+<section class="page-shell">
+  <div class="page-content">
+    <!-- Loading -->
+    <div *ngIf="loadingUser" class="state state-loading">
+      <span class="spinner"></span>
+      Chargement du profil…
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!loadingUser && errorMsg" class="state state-error">{{ errorMsg }}</div>
+
+    <!-- Profile -->
+    <div *ngIf="!loadingUser && user && !errorMsg">
+      <div class="profile-header">
+        <div class="avatar-area">
+          <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" [alt]="user.surnom" class="avatar-img" />
+          <div *ngIf="!user.avatarUrl" class="avatar-initials">{{ getInitials(user) }}</div>
+        </div>
+
+        <div class="identity">
+          <div class="name-row">
+            <h1>{{ user.prenom }} {{ user.nom }}</h1>
+            <span *ngIf="user.accountType === 'PRO'" class="badge-pro">PRO</span>
+          </div>
+          <p class="surnom">@{{ user.surnom }}</p>
+          <p class="ville" *ngIf="user.ville">
+            <span class="icon">📍</span> {{ user.ville }}
+          </p>
+          <p class="bio" *ngIf="user.bio">{{ user.bio }}</p>
+        </div>
+      </div>
+
+      <!-- Listings -->
+      <div class="listings-section">
+        <h2>Annonces de {{ user.prenom }}</h2>
+
+        <div *ngIf="loadingListings" class="state state-loading small">
+          <span class="spinner"></span> Chargement des annonces…
+        </div>
+
+        <div *ngIf="!loadingListings && listings.length === 0" class="empty">
+          Aucune annonce publiée pour l'instant.
+        </div>
+
+        <div *ngIf="!loadingListings && listings.length > 0" class="listings-grid">
+          <a
+            *ngFor="let listing of listings"
+            class="listing-card"
+            [routerLink]="['/annonces', listing.id]"
+          >
+            <div class="listing-img-wrap">
+              <img [src]="getImageUrl(listing)" [alt]="listing.title" class="listing-img" />
+              <span class="listing-type">{{ getTypeLabel(listing) }}</span>
+            </div>
+            <div class="listing-info">
+              <p class="listing-title">{{ listing.title }}</p>
+              <p class="listing-city" *ngIf="listing.city">{{ listing.city }}</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,221 @@
+.page-shell {
+  min-height: calc(100vh - 4rem);
+  padding: 2.5rem 1rem;
+  background: linear-gradient(135deg, #fffaf4 0%, #fff 45%, #f7f1ea 100%);
+}
+
+.page-content {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  border-radius: 14px;
+  font-weight: 500;
+  text-align: center;
+
+  &.state-loading { color: #8f4a1f; background: rgba(209, 124, 58, 0.06); }
+  &.state-error { color: #c0392b; background: rgba(192, 57, 43, 0.06); }
+  &.small { padding: 1rem; font-size: 0.9rem; }
+}
+
+.spinner {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Profile header */
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2.5rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 32px rgba(85, 59, 33, 0.07);
+  border: 1px solid rgba(124, 87, 52, 0.08);
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 560px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+    padding: 2rem 1.5rem;
+  }
+}
+
+.avatar-area {
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(193, 127, 62, 0.2);
+}
+
+.avatar-initials {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c17f3e, #8b5e2e);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #2f1f14;
+    letter-spacing: -0.5px;
+  }
+}
+
+.badge-pro {
+  padding: 0.2rem 0.6rem;
+  background: linear-gradient(135deg, #c17f3e, #a56a30);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.surnom {
+  margin: 0 0 0.5rem;
+  color: #8b7355;
+  font-size: 1rem;
+}
+
+.ville {
+  margin: 0 0 0.75rem;
+  color: #6d5b4e;
+  font-size: 0.9rem;
+
+  .icon { font-size: 0.85em; }
+}
+
+.bio {
+  margin: 0;
+  color: #4a3728;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* Listings */
+.listings-section {
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2f1f14;
+    margin: 0 0 1.25rem;
+  }
+}
+
+.empty {
+  text-align: center;
+  color: #8b7355;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  border: 1px dashed rgba(124, 87, 52, 0.2);
+}
+
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.listing-card {
+  text-decoration: none;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(85, 59, 33, 0.07);
+  border: 1px solid rgba(124, 87, 52, 0.08);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(85, 59, 33, 0.12);
+  }
+}
+
+.listing-img-wrap {
+  position: relative;
+
+  .listing-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.listing-type {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.listing-info {
+  padding: 0.75rem;
+}
+
+.listing-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2f1f14;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listing-city {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8b7355;
+}
