@@ -107,6 +107,43 @@ export class AuthService {
     return this.http.get<User>(`${environment.API_URL}/api/users/me`);
   }
 
+  updateProfile(data: Partial<User>): Observable<User> {
+    return this.http
+      .patch<User>(`${environment.API_URL}/api/users/me`, data)
+      .pipe(tap((updated) => this.setCurrentUser(this.normalizeUser(updated))));
+  }
+
+  changePassword(oldPassword: string, newPassword: string): Observable<void> {
+    return this.http.put<void>(`${environment.API_URL}/api/users/me/password`, {
+      oldPassword,
+      newPassword,
+    });
+  }
+
+  requestPasswordReset(email: string): Observable<void> {
+    return this.http.post<void>(`${this.authBaseUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.authBaseUrl}/reset-password`, { token, newPassword });
+  }
+
+  verifyEmail(token: string): Observable<void> {
+    return this.http.post<void>(`${this.authBaseUrl}/verify-email`, { token });
+  }
+
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${environment.API_URL}/api/users/me`).pipe(
+      tap(() => this.logout())
+    );
+  }
+
+  requestProUpgrade(): Observable<User> {
+    return this.http
+      .post<User>(`${environment.API_URL}/api/users/me/upgrade-pro`, {})
+      .pipe(tap((updated) => this.setCurrentUser(this.normalizeUser(updated))));
+  }
+
   private extractToken(response: AuthResponse): string | null {
     const candidate = response?.token ?? response?.accessToken;
     if (typeof candidate !== 'string') {
