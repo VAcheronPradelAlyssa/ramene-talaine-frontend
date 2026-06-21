@@ -1,0 +1,75 @@
+<section class="page-shell">
+  <div class="page-card">
+    <div class="page-header">
+      <h1>Modifier mon profil</h1>
+      <p class="subtitle">Mettez à jour vos informations personnelles</p>
+    </div>
+
+    <div *ngIf="loading" class="state state-loading">
+      <span class="spinner"></span>
+      Chargement...
+    </div>
+
+    <form *ngIf="!loading && form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="avatar-preview" *ngIf="form.get('avatarUrl')?.value">
+        <img [src]="form.get('avatarUrl')?.value" alt="Aperçu de l'avatar" class="avatar-img" />
+      </div>
+
+      <label class="field-group">
+        <span class="field-label">URL de la photo de profil</span>
+        <input type="url" formControlName="avatarUrl" placeholder="https://..." />
+        <span class="field-hint">Lien vers une image (JPG, PNG, WebP)</span>
+      </label>
+
+      <div class="grid-2">
+        <label class="field-group">
+          <span class="field-label">Prénom <span class="required">*</span></span>
+          <input type="text" formControlName="prenom" />
+          <div class="error" *ngIf="form.get('prenom')?.invalid && form.get('prenom')?.touched">
+            Minimum 2 caractères.
+          </div>
+        </label>
+
+        <label class="field-group">
+          <span class="field-label">Nom <span class="required">*</span></span>
+          <input type="text" formControlName="nom" />
+          <div class="error" *ngIf="form.get('nom')?.invalid && form.get('nom')?.touched">
+            Minimum 2 caractères.
+          </div>
+        </label>
+      </div>
+
+      <label class="field-group">
+        <span class="field-label">Surnom <span class="required">*</span></span>
+        <input type="text" formControlName="surnom" />
+        <div class="error" *ngIf="form.get('surnom')?.invalid && form.get('surnom')?.touched">
+          Minimum 2 caractères.
+        </div>
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">Ville</span>
+        <input type="text" formControlName="ville" placeholder="Paris, Lyon…" />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">Bio</span>
+        <textarea formControlName="bio" rows="4" placeholder="Parlez de vous, de vos créations…"></textarea>
+        <span class="field-hint">{{ bioLength }} / 500 caractères</span>
+        <div class="error" *ngIf="form.get('bio')?.hasError('maxlength')">
+          Maximum 500 caractères.
+        </div>
+      </label>
+
+      <p class="feedback success" *ngIf="successMsg">{{ successMsg }}</p>
+      <p class="feedback error" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <div class="actions">
+        <button type="button" class="btn-secondary" (click)="cancel()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || saving">
+          {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
