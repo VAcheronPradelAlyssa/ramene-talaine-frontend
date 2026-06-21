@@ -100,3 +100,16 @@ button:disabled {
   opacity: 0.7;
   box-shadow: none;
 }
+
+.form-footer {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.forgot-link {
+  font-size: 0.875rem;
+  color: #8b7355;
+  text-decoration: none;
+
+  &:hover { color: #c17f3e; text-decoration: underline; }
+}

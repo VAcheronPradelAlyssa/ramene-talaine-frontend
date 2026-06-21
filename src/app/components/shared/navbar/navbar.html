@@ -148,20 +148,24 @@
 
                     <mat-divider></mat-divider>
 
-                    <button mat-menu-item type="button">
+                    <a mat-menu-item routerLink="/edit-profile" type="button">
+                        <mat-icon>edit</mat-icon>
+                        <span>Modifier mon profil</span>
+                    </a>
+                    <a mat-menu-item routerLink="/change-password" type="button">
+                        <mat-icon>lock</mat-icon>
+                        <span>Changer mon mot de passe</span>
+                    </a>
+                    <a mat-menu-item routerLink="/account-settings" type="button">
                         <mat-icon>settings</mat-icon>
-                        <span>Parametres</span>
-                    </button>
-                    <button mat-menu-item type="button">
-                        <mat-icon>help</mat-icon>
-                        <span>Aide</span>
-                    </button>
+                        <span>Paramètres du compte</span>
+                    </a>
 
                     <mat-divider></mat-divider>
 
                     <button mat-menu-item type="button" (click)="logout()" class="logout-item">
                         <mat-icon>logout</mat-icon>
-                        <span>Deconnexion</span>
+                        <span>Déconnexion</span>
                     </button>
                 </mat-menu>
             </ng-container>

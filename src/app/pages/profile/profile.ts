@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -35,5 +36,9 @@ export class Profile implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  getInitials(user: User): string {
+    return `${user.prenom.charAt(0)}${user.nom.charAt(0)}`.toUpperCase();
   }
 }

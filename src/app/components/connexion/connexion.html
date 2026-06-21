@@ -37,6 +37,10 @@
       <button type="submit" [disabled]="loading || loginForm.invalid">
         {{ loading ? 'Connexion...' : 'Se connecter' }}
       </button>
+
+      <div class="form-footer">
+        <a routerLink="/forgot-password" class="forgot-link">Mot de passe oublié ?</a>
+      </div>
     </form>
   </div>
 </section>
