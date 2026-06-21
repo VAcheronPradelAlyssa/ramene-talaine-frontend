@@ -1,0 +1,72 @@
+<section class="page-shell">
+  <div class="page-card">
+    <div class="page-header">
+      <h1>Paramètres du compte</h1>
+      <p class="subtitle">Gérez votre abonnement et votre compte</p>
+    </div>
+
+    <!-- Compte Pro -->
+    <div class="settings-section">
+      <h2 class="section-title">
+        <span class="section-icon">⭐</span>
+        Compte Professionnel
+      </h2>
+
+      <div *ngIf="isPro" class="pro-active">
+        <span class="badge-pro">PRO</span>
+        <div>
+          <strong>Vous avez un compte Pro actif.</strong>
+          <p>Vous bénéficiez du dashboard de suivi, de la génération de factures et de fonctionnalités avancées.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!isPro" class="pro-request">
+        <p class="pro-desc">
+          Passez en compte Pro pour accéder au dashboard de suivi, à la génération automatique de factures,
+          aux statistiques de ventes et à la mise en avant de vos annonces.
+        </p>
+        <p class="feedback success" *ngIf="proSuccessMsg">{{ proSuccessMsg }}</p>
+        <p class="feedback error" *ngIf="proErrorMsg">{{ proErrorMsg }}</p>
+        <button class="btn-pro" (click)="requestPro()" [disabled]="proLoading">
+          {{ proLoading ? 'Envoi en cours…' : 'Demander un compte Pro (gratuit)' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Suppression du compte -->
+    <div class="settings-section danger-zone">
+      <h2 class="section-title danger">
+        <span class="section-icon">⚠</span>
+        Zone de danger
+      </h2>
+
+      <div *ngIf="deleteStep === 'idle'">
+        <p class="danger-desc">
+          La suppression de votre compte est irréversible. Toutes vos annonces, messages et données seront effacés définitivement.
+        </p>
+        <button class="btn-danger" (click)="startDelete()">Supprimer mon compte</button>
+      </div>
+
+      <div *ngIf="deleteStep === 'confirm' || deleteStep === 'deleting'" class="confirm-block">
+        <p class="danger-desc danger-strong">
+          Êtes-vous absolument certain ? Cette action est <strong>irréversible</strong>.
+        </p>
+        <p class="feedback error" *ngIf="deleteErrorMsg">{{ deleteErrorMsg }}</p>
+        <div class="confirm-actions">
+          <button class="btn-secondary" (click)="cancelDelete()" [disabled]="deleteStep === 'deleting'">
+            Annuler
+          </button>
+          <button class="btn-danger" (click)="confirmDelete()" [disabled]="deleteStep === 'deleting'">
+            {{ deleteStep === 'deleting' ? 'Suppression…' : 'Oui, supprimer définitivement' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-nav">
+      <a routerLink="/profile">← Retour au profil</a>
+    </div>
+  </div>
+</section>
