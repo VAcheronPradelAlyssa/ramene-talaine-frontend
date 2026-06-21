@@ -1,0 +1,27 @@
+<section class="page-shell">
+  <div class="page-card">
+    <div *ngIf="state === 'loading'" class="state state-loading">
+      <span class="spinner"></span>
+      Vérification en cours…
+    </div>
+
+    <div *ngIf="state === 'success'" class="state-block state-success">
+      <div class="icon-circle success">✓</div>
+      <h1>Email vérifié !</h1>
+      <p>Votre adresse email a bien été confirmée. Votre compte est maintenant actif.</p>
+      <a routerLink="/connexion" class="btn-primary">Se connecter</a>
+    </div>
+
+    <div *ngIf="state === 'missing' || state === 'error'" class="state-block state-error">
+      <div class="icon-circle error">✕</div>
+      <h1>Lien invalide</h1>
+      <p *ngIf="state === 'missing'">
+        Aucun token de vérification trouvé dans l'URL.
+      </p>
+      <p *ngIf="state === 'error'">
+        Ce lien est invalide ou a expiré. Reconnectez-vous pour recevoir un nouveau lien.
+      </p>
+      <a routerLink="/connexion" class="btn-secondary">Aller à la connexion</a>
+    </div>
+  </div>
+</section>
