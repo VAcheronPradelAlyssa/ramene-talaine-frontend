@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -13,6 +13,7 @@ import { User } from '../../models/user.model';
 export class AccountSettings implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   proLoading = false;
@@ -42,10 +43,12 @@ export class AccountSettings implements OnInit {
         this.user = updated;
         this.proSuccessMsg = 'Votre demande de compte Pro a été envoyée. Vous serez notifié par email.';
         this.proLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.proErrorMsg = err?.error?.message || 'Erreur lors de la demande. Réessayez plus tard.';
         this.proLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -71,6 +74,7 @@ export class AccountSettings implements OnInit {
       error: (err) => {
         this.deleteErrorMsg = err?.error?.message || 'Erreur lors de la suppression. Réessayez.';
         this.deleteStep = 'confirm';
+        this.cdr.detectChanges();
       },
     });
   }

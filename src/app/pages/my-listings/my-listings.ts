@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -14,6 +14,7 @@ import { getColorLabels } from '../../utils/color.utils';
 })
 export class MyListings implements OnInit {
   private listingService = inject(ListingService);
+  private cdr = inject(ChangeDetectorRef);
 
   listings: Listing[] = [];
   loading = true;
@@ -31,11 +32,13 @@ export class MyListings implements OnInit {
       next: (data) => {
         this.listings = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error: HttpErrorResponse) => {
         this.listings = [];
         this.loading = false;
         this.errorMessage = this.buildErrorMessage(error);
+        this.cdr.detectChanges();
       },
     });
   }
@@ -56,6 +59,7 @@ export class MyListings implements OnInit {
       },
       error: () => {
         this.deleting = null;
+        this.cdr.detectChanges();
       },
     });
   }

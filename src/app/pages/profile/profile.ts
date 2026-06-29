@@ -1,5 +1,5 @@
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Profile implements OnInit {
   private readonly auth = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   loading = false;
@@ -30,10 +31,12 @@ export class Profile implements OnInit {
         this.user = user;
         this.auth.setCurrentUser(user);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.errorMsg = error?.error?.message || 'Erreur lors du chargement du profil.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth.service';
 export class ForgotPassword {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
 
   form: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -33,10 +34,12 @@ export class ForgotPassword {
       next: () => {
         this.sent = true;
         this.sending = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMsg = err?.error?.message || 'Erreur lors de l\'envoi. Vérifiez votre adresse email.';
         this.sending = false;
+        this.cdr.detectChanges();
       },
     });
   }

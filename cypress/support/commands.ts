@@ -43,8 +43,14 @@ const PRO_USER = {
 
 Cypress.Commands.add('login', (options = {}) => {
   const user = options.pro ? PRO_USER : BASE_USER;
-  localStorage.setItem('auth_token', 'fake-jwt-token-for-tests');
-  localStorage.setItem('auth_user', JSON.stringify(user));
+  // localStorage in spec context belongs to the Cypress runner frame, not the AUT.
+  // We visit the app first to obtain the AUT window, then write to its localStorage.
+  // The token persists across the next cy.visit() since both share the same origin.
+  cy.visit('/#/', { log: false });
+  cy.window({ log: false }).then((win) => {
+    win.localStorage.setItem('auth_token', 'fake-jwt-token-for-tests');
+    win.localStorage.setItem('auth_user', JSON.stringify(user));
+  });
 });
 
 Cypress.Commands.add('interceptRefData', () => {

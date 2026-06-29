@@ -23,7 +23,12 @@ describe('Page création d\'annonce (/create-listing)', () => {
   });
 
   it('affiche le champ Prix uniquement pour le type SALE', () => {
+    // Par défaut, le type est SALE → le champ prix est visible
+    cy.get('input[formControlName="price"]').should('be.visible');
+    // Changer vers FREE → le champ prix disparaît
+    cy.get('select[formControlName="type"]').select('FREE');
     cy.get('input[formControlName="price"]').should('not.exist');
+    // Revenir à SALE → le champ prix réapparaît
     cy.get('select[formControlName="type"]').select('SALE');
     cy.get('input[formControlName="price"]').should('be.visible');
   });
@@ -51,9 +56,14 @@ describe('Page création d\'annonce (/create-listing)', () => {
     });
 
     cy.get('input[formControlName="title"]').type('Nouvelle pelote');
-    cy.get('textarea[formControlName="description"]').type('Belle pelote rose.');
+    cy.get('textarea[formControlName="description"]').type('Belle pelote rose en laine douce.');
+    // Saisir la marque directement (le validator accepte toute valeur non-vide différente de "Autre")
+    cy.get('input[formControlName="brand"]').type('Drops');
+    // Ajouter une couleur (satisfait le Validators.minLength(1) du FormArray)
+    cy.contains('button', 'Ajouter une couleur').click();
     cy.get('input[formControlName="weightValue"]').type('50');
     cy.get('input[formControlName="length"]').type('100');
+    cy.get('input[formControlName="price"]').type('5');
     cy.get('input[formControlName="city"]').type('Lyon');
     cy.get('input[formControlName="postalCode"]').type('69001');
 

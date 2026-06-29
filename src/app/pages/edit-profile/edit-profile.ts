@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -15,6 +15,7 @@ export class EditProfile implements OnInit {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   form!: FormGroup;
   loading = false;
@@ -29,10 +30,12 @@ export class EditProfile implements OnInit {
         this.auth.setCurrentUser(user);
         this.form = this.buildForm(user);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.form = this.buildForm(this.auth.getCurrentUser());
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -58,10 +61,12 @@ export class EditProfile implements OnInit {
       next: () => {
         this.successMsg = 'Profil mis à jour avec succès.';
         this.saving = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMsg = err?.error?.message || 'Erreur lors de la mise à jour.';
         this.saving = false;
+        this.cdr.detectChanges();
       },
     });
   }

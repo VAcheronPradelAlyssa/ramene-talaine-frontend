@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
 export class EmailVerification implements OnInit {
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   state: 'loading' | 'success' | 'error' | 'missing' = 'loading';
 
@@ -24,8 +25,8 @@ export class EmailVerification implements OnInit {
     }
 
     this.auth.verifyEmail(token).subscribe({
-      next: () => { this.state = 'success'; },
-      error: () => { this.state = 'error'; },
+      next: () => { this.state = 'success'; this.cdr.detectChanges(); },
+      error: () => { this.state = 'error'; this.cdr.detectChanges(); },
     });
   }
 }

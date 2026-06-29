@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { UserService } from '../../services/user.service';
@@ -15,6 +15,7 @@ export class UserProfile implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private userService = inject(UserService);
+  private cdr = inject(ChangeDetectorRef);
 
   user?: User;
   listings: Listing[] = [];
@@ -34,10 +35,12 @@ export class UserProfile implements OnInit {
       next: (user) => {
         this.user = user;
         this.loadingUser = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMsg = 'Utilisateur introuvable.';
         this.loadingUser = false;
+        this.cdr.detectChanges();
       },
     });
 
@@ -45,9 +48,11 @@ export class UserProfile implements OnInit {
       next: (listings) => {
         this.listings = listings;
         this.loadingListings = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingListings = false;
+        this.cdr.detectChanges();
       },
     });
   }

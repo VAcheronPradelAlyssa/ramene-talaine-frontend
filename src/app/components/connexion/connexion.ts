@@ -1,5 +1,5 @@
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -9,11 +9,11 @@ import { AuthService } from '../../services/auth.service';
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './connexion.html',
   styleUrl: './connexion.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Connexion {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   email = '';
   password = '';
@@ -35,11 +35,13 @@ export class Connexion {
         this.auth.setCurrentUser(response.user ?? null);
         this.successMsg = 'Connexion réussie.';
         this.loading = false;
+        this.cdr.detectChanges();
         void this.router.navigate(['/']);
       },
       error: (error) => {
         this.errorMsg = error?.error?.message || 'Erreur lors de la connexion.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

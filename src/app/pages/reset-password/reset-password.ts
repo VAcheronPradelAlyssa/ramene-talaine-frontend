@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -21,6 +21,7 @@ export class ResetPassword implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   token = '';
   tokenMissing = false;
@@ -57,11 +58,13 @@ export class ResetPassword implements OnInit {
       next: () => {
         this.done = true;
         this.saving = false;
+        this.cdr.detectChanges();
         setTimeout(() => void this.router.navigate(['/connexion']), 3000);
       },
       error: (err) => {
         this.errorMsg = err?.error?.message || 'Le lien est invalide ou a expiré.';
         this.saving = false;
+        this.cdr.detectChanges();
       },
     });
   }

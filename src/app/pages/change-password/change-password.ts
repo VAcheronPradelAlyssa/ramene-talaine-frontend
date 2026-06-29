@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -20,6 +20,7 @@ export class ChangePassword {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   form: FormGroup = this.fb.group(
     {
@@ -50,10 +51,12 @@ export class ChangePassword {
         this.successMsg = 'Mot de passe modifié avec succès.';
         this.form.reset();
         this.saving = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMsg = err?.error?.message || 'Mot de passe actuel incorrect ou erreur serveur.';
         this.saving = false;
+        this.cdr.detectChanges();
       },
     });
   }
