@@ -38,6 +38,8 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+TODO.md
+PRODUCT_SPEC.md
 
 # System files
 .DS_Store
