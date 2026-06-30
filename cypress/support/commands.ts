@@ -41,17 +41,45 @@ const PRO_USER = {
   createdAt: '2024-06-01T08:00:00Z',
 };
 
+type AuthPayload = { user: typeof BASE_USER | typeof PRO_USER; token: string };
+
+// cy.login() stocke les données d'auth que le prochain cy.visit() injecte via
+// onBeforeLoad — avant qu'Angular démarre — garantissant que AuthService
+// lit le bon utilisateur dès son constructeur, sans zone/detectChanges nécessaire.
+let _pendingAuth: AuthPayload | null = null;
+
 Cypress.Commands.add('login', (options = {}) => {
-  const user = options.pro ? PRO_USER : BASE_USER;
-  // localStorage in spec context belongs to the Cypress runner frame, not the AUT.
-  // We visit the app first to obtain the AUT window, then write to its localStorage.
-  // The token persists across the next cy.visit() since both share the same origin.
-  cy.visit('/#/', { log: false });
-  cy.window({ log: false }).then((win) => {
-    win.localStorage.setItem('auth_token', 'fake-jwt-token-for-tests');
-    win.localStorage.setItem('auth_user', JSON.stringify(user));
-  });
+  _pendingAuth = {
+    user: options.pro ? PRO_USER : BASE_USER,
+    token: 'fake-jwt-token-for-tests',
+  };
 });
+
+// Surcharge cy.visit : si un cy.login() précédent a stocké des données d'auth,
+// on les injecte dans le localStorage de l'AUT avant que la page se charge.
+Cypress.Commands.overwrite(
+  'visit',
+  (
+    originalFn: (...args: unknown[]) => Cypress.Chainable<Cypress.AUTWindow>,
+    url: string,
+    options: Partial<Cypress.VisitOptions> = {}
+  ) => {
+    if (_pendingAuth) {
+      const auth = _pendingAuth;
+      _pendingAuth = null;
+      const existingBefore = options.onBeforeLoad;
+      return originalFn(url, {
+        ...options,
+        onBeforeLoad(win: Cypress.AUTWindow) {
+          win.localStorage.setItem('auth_token', auth.token);
+          win.localStorage.setItem('auth_user', JSON.stringify(auth.user));
+          existingBefore?.(win);
+        },
+      });
+    }
+    return originalFn(url, options);
+  }
+);
 
 Cypress.Commands.add('interceptRefData', () => {
   cy.fixture('brands').then((brands) => {
